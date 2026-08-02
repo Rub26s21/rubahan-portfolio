@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/* LOCAL FONTS */
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Semibold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/ClashDisplay-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'General Sans';
+  src: url('/fonts/GeneralSans-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/fonts/InstrumentSerif-Italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spline Sans Mono';
+  src: url('/fonts/SplineSansMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spline Sans Mono';
+  src: url('/fonts/SplineSansMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* DESIGN TOKENS (Tailwind CSS v4) */
+@theme {
+  --color-canvas: #F6FAFD;
+  --color-surface: #FFFFFF;
+  --color-ink: #0B1F33;
+  --color-sky: #38BDF8;
+  --color-glow: #7DD3FC;
+  --color-deep: #0EA5E9;
+  --color-mist: #8FB3C7;
+  --color-amber: #FFB86B;
+
+  --font-sans: 'General Sans', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Clash Display', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'Spline Sans Mono', monospace;
+}
+
+/* BASE LAYER (Light theme only) */
+@layer base {
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 10vw, 9rem);
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+}
+
+/* UTILITY LAYER */
+@layer utilities {
+  .line-mask {
+    overflow: hidden;
+    display: block;
+  }
+}
+
+/* REDUCED MOTION PREFERENCE */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+}
