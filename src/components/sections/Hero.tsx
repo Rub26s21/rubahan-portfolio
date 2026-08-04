@@ -35,30 +35,30 @@ export const Hero: React.FC = () => {
     if (reducedMotion || !preloaderFinished) return;
 
     const ctx = gsap.context(() => {
-      // Entrance Timeline matching the exact timing sequence of hey.mp4
+      // Timeline exactly replicating the 7-phase frame sequence in hey.mp4
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // 1. Giant Background Name "RUBAHAN" (0.2s)
+      // Phase 1 (0.2s): Giant Neon Display Name "RUBAHAN" unmasks across top
       if (giantTextRef.current) {
         tl.fromTo(
           giantTextRef.current,
-          { opacity: 0, scale: 0.92, y: -20 },
-          { opacity: 1, scale: 1.0, y: 0, duration: 1.1, ease: "power4.out" },
-          0.1
+          { opacity: 0, scale: 0.9, y: -30 },
+          { opacity: 1, scale: 1.0, y: 0, duration: 1.0, ease: "power4.out" },
+          0.2
         );
       }
 
-      // 2. Centered Portrait Photo slides up from below (0.5s)
+      // Phase 2 (0.7s): Centered Portrait Photo slides UP from bottom center
       if (photoRef.current) {
         tl.fromTo(
           photoRef.current,
-          { opacity: 0, y: 80, scale: 0.95 },
-          { opacity: 1, y: 0, scale: 1.0, duration: 1.2, ease: "power3.out" },
-          0.4
+          { opacity: 0, yPercent: 60, scale: 0.92 },
+          { opacity: 1, yPercent: 0, scale: 1.0, duration: 1.1, ease: "power3.out" },
+          0.6
         );
       }
 
-      // 3. Overlay Headline Text "Engineering, Applied Differently." (0.8s)
+      // Phase 3 (1.3s): Overlay Headline Text "Engineering, Applied Differently." unmasks over torso
       if (h1Ref.current) {
         const split = new SplitText(h1Ref.current, {
           type: "lines,words",
@@ -73,54 +73,58 @@ export const Hero: React.FC = () => {
             opacity: 1,
             duration: 0.85,
             ease: "power4.out",
-            stagger: 0.1,
+            stagger: 0.12,
           },
-          0.7
+          1.2
         );
       }
 
-      // 4. Floating Left Stats & Right Glass Traits Cards (1.1s)
-      if (leftCardsRef.current && rightCardRef.current) {
+      // Phase 4 (1.9s): Floating Left Stats Cards slide in from left edge
+      if (leftCardsRef.current) {
         tl.fromTo(
           leftCardsRef.current,
-          { opacity: 0, x: -60 },
-          { opacity: 1, x: 0, duration: 0.8, ease: "back.out(1.4)" },
-          1.0
-        );
-
-        tl.fromTo(
-          rightCardRef.current,
-          { opacity: 0, x: 60 },
-          { opacity: 1, x: 0, duration: 0.8, ease: "back.out(1.4)" },
-          1.1
+          { opacity: 0, x: -100, scale: 0.85 },
+          { opacity: 1, x: 0, scale: 1.0, duration: 0.8, ease: "back.out(1.7)" },
+          1.8
         );
       }
 
-      // 5. Action Buttons & Editorial Navigation Links (1.4s)
+      // Phase 5 (2.1s): Right Glass Traits List Card slides in from right edge
+      if (rightCardRef.current) {
+        tl.fromTo(
+          rightCardRef.current,
+          { opacity: 0, x: 100, scale: 0.85 },
+          { opacity: 1, x: 0, scale: 1.0, duration: 0.8, ease: "back.out(1.7)" },
+          2.0
+        );
+      }
+
+      // Phase 6 (2.3s): Action Buttons spring-pop up under headline text
       if (ctaButtonsRef.current) {
         tl.fromTo(
           ctaButtonsRef.current,
-          { opacity: 0, scale: 0.85, y: 20 },
-          { opacity: 1, scale: 1.0, y: 0, duration: 0.7, ease: "back.out(1.6)" },
-          1.3
+          { opacity: 0, scale: 0, y: 30 },
+          { opacity: 1, scale: 1.0, y: 0, duration: 0.7, ease: "back.out(2.0)" },
+          2.2
         );
       }
 
+      // Phase 7 (2.6s): Top split nav bar links & bottom editorial copy fade in
       if (navLeftRef.current && navRightRef.current && bottomCopyRef.current) {
         tl.fromTo(
           [navLeftRef.current, navRightRef.current, bottomCopyRef.current],
           { opacity: 0, y: 15 },
           { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-          1.4
+          2.5
         );
       }
 
-      // 6. Scroll Parallax: Photo & Giant Type Move Straight UP on Scroll
+      // Scroll Parallax: Photo & Giant Type move smoothly UP on scroll (never vanishes)
       const section = sectionRef.current;
       if (!section || !isDesktop) return;
 
       gsap.to(photoRef.current, {
-        y: "-150px",
+        y: "-140px",
         ease: "none",
         scrollTrigger: {
           trigger: section,
@@ -131,7 +135,7 @@ export const Hero: React.FC = () => {
       });
 
       gsap.to(giantTextRef.current, {
-        y: "-90px",
+        y: "-80px",
         ease: "none",
         scrollTrigger: {
           trigger: section,
@@ -164,7 +168,7 @@ export const Hero: React.FC = () => {
       {/* ── GIANT NEON DISPLAY NAME "RUBAHAN" ── */}
       <div
         ref={giantTextRef}
-        className="absolute top-2 left-0 w-full text-center font-heading font-extrabold text-[22vw] leading-none text-[#CCFF00] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
+        className="absolute top-2 left-0 w-full text-center font-heading font-extrabold text-[22vw] leading-none text-[#CCFF00] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform opacity-0"
         style={{
           textShadow: "0 10px 40px rgba(204,255,0,0.25)",
         }}
@@ -174,31 +178,31 @@ export const Hero: React.FC = () => {
 
       {/* ── SPLIT TOP NAVIGATION BAR ── */}
       <div className="w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-4 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33]">
-        <div ref={navLeftRef} className="flex gap-6 items-center">
-          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#88A000] transition-colors">HOME</button>
+        <div ref={navLeftRef} className="flex gap-6 items-center opacity-0">
+          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#88A000] transition-colors cursor-pointer">HOME</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("about")} className="hover:text-[#88A000] transition-colors">ABOUT ME</button>
+          <button onClick={() => handleScrollTo("about")} className="hover:text-[#88A000] transition-colors cursor-pointer">ABOUT ME</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#88A000] transition-colors">PROJECTS</button>
+          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#88A000] transition-colors cursor-pointer">PROJECTS</button>
         </div>
 
-        <div ref={navRightRef} className="flex gap-6 items-center">
-          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#88A000] transition-colors">WHAT YOU GET</button>
+        <div ref={navRightRef} className="flex gap-6 items-center opacity-0">
+          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#88A000] transition-colors cursor-pointer">WHAT YOU GET</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("services")} className="hover:text-[#88A000] transition-colors">SERVICES</button>
+          <button onClick={() => handleScrollTo("services")} className="hover:text-[#88A000] transition-colors cursor-pointer">SERVICES</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("process")} className="hover:text-[#88A000] transition-colors">PROCESS</button>
+          <button onClick={() => handleScrollTo("process")} className="hover:text-[#88A000] transition-colors cursor-pointer">PROCESS</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#88A000] transition-colors">FAQ</button>
+          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#88A000] transition-colors cursor-pointer">FAQ</button>
         </div>
       </div>
 
-      {/* ── CENTERPORTRAIT & OVERLAY CONTENT ── */}
+      {/* ── CENTER PORTRAIT & OVERLAY CONTENT ── */}
       <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-12">
         {/* CENTERED PORTRAIT PHOTO */}
         <div
           ref={photoRef}
-          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white/20 backdrop-blur-sm z-10 will-change-transform"
+          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white/20 backdrop-blur-sm z-10 will-change-transform opacity-0"
         >
           <img
             src="/photo.jpg"
@@ -215,7 +219,7 @@ export const Hero: React.FC = () => {
         {/* ── FLOATING LEFT STATS CARDS ── */}
         <div
           ref={leftCardsRef}
-          className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex will-change-transform"
+          className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex will-change-transform opacity-0"
         >
           {/* Card 1: 5 Flagship Projects */}
           <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
@@ -246,7 +250,7 @@ export const Hero: React.FC = () => {
         {/* ── FLOATING RIGHT TRAITS GLASS LIST CARD ── */}
         <div
           ref={rightCardRef}
-          className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 will-change-transform"
+          className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 will-change-transform opacity-0"
         >
           <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0B1F33] border-b border-black/10 pb-2">
             <Zap className="w-4 h-4 text-[#CCFF00] fill-current" />
@@ -287,7 +291,7 @@ export const Hero: React.FC = () => {
           {/* NEON YELLOW ACTION BUTTONS */}
           <div
             ref={ctaButtonsRef}
-            className="flex items-center justify-center gap-4 pointer-events-auto"
+            className="flex items-center justify-center gap-4 pointer-events-auto opacity-0"
           >
             <Magnetic>
               <a
@@ -313,7 +317,7 @@ export const Hero: React.FC = () => {
       {/* ── BOTTOM EDITORIAL FOOTER COPY ── */}
       <div
         ref={bottomCopyRef}
-        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
+        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10 opacity-0"
       >
         <div className="max-w-xs font-bold">
           <p className="text-[#0B1F33] font-heading text-sm font-bold">
@@ -327,6 +331,9 @@ export const Hero: React.FC = () => {
           </p>
         </div>
       </div>
+
+      {/* Bottom Center Handle Pill (as seen in hey.mp4 frame 00:00) */}
+      <div className="w-12 h-1.5 bg-[#0B1F33]/20 rounded-full mx-auto mt-2" />
     </section>
   );
 };
