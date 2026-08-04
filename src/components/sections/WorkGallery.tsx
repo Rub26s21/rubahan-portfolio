@@ -10,7 +10,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const Projects: React.FC = () => {
+export const WorkGallery: React.FC = () => {
   useActiveSection("projects");
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setCursorLabel = useAppStore((s) => s.setCursorLabel);
@@ -32,7 +32,7 @@ export const Projects: React.FC = () => {
     }
   };
 
-  // DESKTOP: PINNED HORIZONTAL GALLERY & DARK THEME TOGGLE
+  // DESKTOP: PINNED HORIZONTAL GALLERY (300vh pin distance)
   useEffect(() => {
     const section = sectionRef.current;
     const track = trackRef.current;
@@ -42,18 +42,15 @@ export const Projects: React.FC = () => {
       // Calculate total horizontal scroll distance
       const totalScrollWidth = track.scrollWidth - window.innerWidth + 320;
 
-      // 1. PIN & HORIZONTAL TRACK TRANSLATION WITH theme-dark TOGGLE
+      // Pin timeline: vertical scroll drives track x: 0 -> -totalScrollWidth over 300vh
       const pinTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: `+=${Math.max(totalScrollWidth, window.innerHeight * 3)}`,
+          end: "+=300vh",
           pin: true,
           pinSpacing: true,
           scrub: 0.8,
-          onToggle: (self) => {
-            document.documentElement.classList.toggle("theme-dark", self.isActive);
-          },
           onRefresh: () => {
             ScrollTrigger.update();
           },
@@ -65,16 +62,16 @@ export const Projects: React.FC = () => {
         ease: "none",
       });
 
-      // 2. CARD CENTER CROSS SCALE (0.9 -> 1.05) & OPACITY (0.6 -> 1)
+      // Continuous Card Center Cross Scale (1.0 vs 0.92) & Opacity (1.0 vs 0.55)
       cardsRef.current.forEach((card) => {
         if (!card) return;
 
         // Scale up + full opacity when approaching center
         gsap.fromTo(
           card,
-          { scale: 0.9, opacity: 0.6 },
+          { scale: 0.92, opacity: 0.55 },
           {
-            scale: 1.05,
+            scale: 1,
             opacity: 1,
             ease: "power1.out",
             scrollTrigger: {
@@ -89,8 +86,8 @@ export const Projects: React.FC = () => {
 
         // Scale down + lower opacity after leaving center
         gsap.to(card, {
-          scale: 0.9,
-          opacity: 0.6,
+          scale: 0.92,
+          opacity: 0.55,
           ease: "power1.in",
           scrollTrigger: {
             trigger: card,
@@ -103,54 +100,34 @@ export const Projects: React.FC = () => {
       });
     }, sectionRef);
 
-    return () => {
-      ctx.revert();
-      document.documentElement.classList.remove("theme-dark");
-    };
-  }, [reducedMotion, isDesktop]);
-
-  // MOBILE: DARK THEME TOGGLE ON SCROLL (<=768px)
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section || reducedMotion || isDesktop) return;
-
-    const trigger = ScrollTrigger.create({
-      trigger: section,
-      start: "top 60%",
-      end: "bottom 40%",
-      onToggle: (self) => {
-        document.documentElement.classList.toggle("theme-dark", self.isActive);
-      },
-    });
-
-    return () => {
-      trigger.kill();
-      document.documentElement.classList.remove("theme-dark");
-    };
+    return () => ctx.revert();
   }, [reducedMotion, isDesktop]);
 
   return (
     <section
       id="projects"
       ref={sectionRef}
-      className={`relative w-full bg-canvas select-none z-10 transition-colors duration-300 overflow-hidden ${
+      className={`relative w-full bg-[#0B1F33] text-[#F6FAFD] select-none z-10 overflow-hidden ${
         isDesktop ? "h-screen py-12 flex flex-col justify-between" : "py-24 px-6"
       }`}
     >
+      {/* Soft gradient edge at section top (white -> dark fade) */}
+      <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#F6FAFD] to-transparent pointer-events-none z-20 opacity-20" />
+
       {/* Top Header - Pinned Top-Left */}
-      <div className="w-full max-w-7xl mx-auto px-6 md:pl-72 md:pr-12 pt-4">
+      <div className="w-full max-w-7xl mx-auto px-6 md:pl-72 md:pr-12 pt-4 relative z-10">
         <SectionHeading eyebrow="Selected Work" title="Built to Perform" />
-        <p className="text-mist font-mono text-xs md:text-sm mt-3 max-w-xl">
+        <p className="text-[#8FB3C7] font-mono text-xs md:text-sm mt-3 max-w-xl">
           AI, web, and silicon combined — turning real problems into systems that ship, perform, and keep working.
         </p>
       </div>
 
       {/* DESKTOP PINNED HORIZONTAL GALLERY TRACK */}
       {isDesktop ? (
-        <div className="w-full overflow-hidden my-auto py-6">
+        <div className="w-full overflow-hidden my-auto py-6 relative z-10">
           <div
             ref={trackRef}
-            className="flex gap-8 pl-72 pr-32 w-max items-center will-change-transform"
+            className="flex gap-[6vw] pl-72 pr-32 w-max items-center will-change-transform"
           >
             {PROJECTS.map((project, idx) => {
               const outcomeInfo = WORK_OUTCOMES.find((o) => o.id === project.id);
@@ -172,7 +149,7 @@ export const Projects: React.FC = () => {
                     setHoveredIdx(null);
                     setCursorLabel("");
                   }}
-                  className={`w-[480px] lg:w-[540px] h-[400px] p-8 bg-surface rounded-2xl border border-mist/20 shadow-2xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform focus:outline-none focus:ring-2 focus:ring-sky ${
+                  className={`w-[60vw] max-w-[580px] h-[420px] p-8 bg-[#10283f] rounded-2xl border border-[#8FB3C7]/20 shadow-2xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform focus:outline-none focus:ring-2 focus:ring-sky ${
                     hoveredIdx !== null && hoveredIdx !== idx
                       ? "opacity-40 scale-95"
                       : "opacity-100"
@@ -188,27 +165,27 @@ export const Projects: React.FC = () => {
                       <span className="px-3 py-1 bg-sky/10 text-sky text-xs font-mono font-bold rounded-full border border-sky/20">
                         {project.index}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-mist">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#8FB3C7]">
                         {project.domain} · {project.year}
                       </span>
                     </div>
 
-                    <h3 className="font-heading text-2xl font-bold text-ink leading-snug group-hover:text-sky transition-colors duration-300 mb-2">
+                    <h3 className="font-heading text-2xl font-bold text-[#F6FAFD] leading-snug group-hover:text-sky transition-colors duration-300 mb-2">
                       {project.title}
                     </h3>
-                    <p className="text-xs md:text-sm text-mist font-medium leading-relaxed">
+                    <p className="text-xs md:text-sm text-[#8FB3C7] font-medium leading-relaxed">
                       {outcome}
                     </p>
                   </div>
 
                   {/* Impact grid */}
-                  <div className="grid grid-cols-3 gap-3 border-y border-mist/15 py-4 my-2">
+                  <div className="grid grid-cols-3 gap-3 border-y border-[#8FB3C7]/15 py-4 my-2">
                     {project.impact.slice(0, 3).map((imp, i) => (
                       <div key={i} className="flex flex-col">
-                        <span className="font-heading text-base font-bold text-ink">
+                        <span className="font-heading text-base font-bold text-[#F6FAFD]">
                           {imp.value}
                         </span>
-                        <span className="text-[9px] font-mono text-mist leading-tight">
+                        <span className="text-[9px] font-mono text-[#8FB3C7] leading-tight">
                           {imp.label}
                         </span>
                       </div>
@@ -221,7 +198,7 @@ export const Projects: React.FC = () => {
                       {chips.slice(0, 3).map((chip, i) => (
                         <span
                           key={i}
-                          className="px-2.5 py-0.5 border border-mist/20 text-mist text-[9px] font-mono rounded-full"
+                          className="px-2.5 py-0.5 border border-[#8FB3C7]/20 text-[#8FB3C7] text-[9px] font-mono rounded-full"
                         >
                           {chip}
                         </span>
@@ -240,7 +217,7 @@ export const Projects: React.FC = () => {
         </div>
       ) : (
         /* MOBILE SCROLL-SNAP SWIPER (≤768px) */
-        <div className="w-full overflow-x-auto snap-x snap-mandatory flex gap-5 py-6 mt-6 px-4 no-scrollbar">
+        <div className="w-full overflow-x-auto snap-x snap-mandatory flex gap-5 py-6 mt-6 px-4 no-scrollbar relative z-10">
           {PROJECTS.map((project) => {
             const outcomeInfo = WORK_OUTCOMES.find((o) => o.id === project.id);
             const chips = outcomeInfo ? outcomeInfo.chips : project.stack.slice(0, 3);
@@ -252,7 +229,7 @@ export const Projects: React.FC = () => {
                 tabIndex={0}
                 onClick={() => handleActivateProject(project.github)}
                 onKeyDown={(e) => handleKeyDown(e, project.github)}
-                className="w-[85vw] max-w-[340px] shrink-0 snap-center p-6 bg-surface rounded-2xl border border-mist/20 shadow-md flex flex-col justify-between min-h-[360px] active:scale-95 transition-transform cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky"
+                className="w-[85vw] max-w-[340px] shrink-0 snap-center p-6 bg-[#10283f] rounded-2xl border border-[#8FB3C7]/20 shadow-md flex flex-col justify-between min-h-[360px] active:scale-95 transition-transform cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky"
                 style={{ borderTop: `4px solid ${project.accent}` }}
                 aria-label={`Open ${project.title} on GitHub. Outcome: ${outcome}`}
               >
@@ -261,26 +238,26 @@ export const Projects: React.FC = () => {
                     <span className="px-2.5 py-0.5 bg-sky/10 text-sky text-[10px] font-mono font-bold rounded-full">
                       {project.index}
                     </span>
-                    <span className="font-mono text-[9px] uppercase tracking-widest text-mist">
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[#8FB3C7]">
                       {project.domain}
                     </span>
                   </div>
 
-                  <h3 className="font-heading text-xl font-bold text-ink mb-2">
+                  <h3 className="font-heading text-xl font-bold text-[#F6FAFD] mb-2">
                     {project.title}
                   </h3>
-                  <p className="text-xs text-mist leading-relaxed font-medium">
+                  <p className="text-xs text-[#8FB3C7] leading-relaxed font-medium">
                     {outcome}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 border-y border-mist/15 py-3 my-3">
+                <div className="grid grid-cols-3 gap-2 border-y border-[#8FB3C7]/15 py-3 my-3">
                   {project.impact.slice(0, 3).map((imp, i) => (
                     <div key={i} className="flex flex-col">
-                      <span className="font-heading text-sm font-bold text-ink">
+                      <span className="font-heading text-sm font-bold text-[#F6FAFD]">
                         {imp.value}
                       </span>
-                      <span className="text-[8px] font-mono text-mist leading-tight">
+                      <span className="text-[8px] font-mono text-[#8FB3C7] leading-tight">
                         {imp.label}
                       </span>
                     </div>
@@ -292,7 +269,7 @@ export const Projects: React.FC = () => {
                     {chips.slice(0, 2).map((chip, i) => (
                       <span
                         key={i}
-                        className="px-2 py-0.5 border border-mist/20 text-mist text-[8px] font-mono rounded-full"
+                        className="px-2 py-0.5 border border-[#8FB3C7]/20 text-[#8FB3C7] text-[8px] font-mono rounded-full"
                       >
                         {chip}
                       </span>
@@ -308,6 +285,9 @@ export const Projects: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* Soft gradient edge at section bottom (dark -> white fade) */}
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#F6FAFD] to-transparent pointer-events-none z-20 opacity-20" />
     </section>
   );
 };

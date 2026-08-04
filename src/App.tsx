@@ -1,9 +1,10 @@
 import { SmoothScrollProvider } from "@/providers/SmoothScrollProvider";
 import { Nav } from "@/components/Nav";
 import { CustomCursor } from "@/components/CustomCursor";
+import { PhotoGhost } from "@/components/PhotoGhost";
 import { Hero } from "@/components/sections/Hero";
 import { Journey } from "@/components/sections/Journey";
-import { Projects } from "@/components/sections/Projects";
+import { WorkGallery } from "@/components/sections/WorkGallery";
 import { WhatYouGet } from "@/components/sections/WhatYouGet";
 import { Services } from "@/components/sections/Services";
 import { Recognition } from "@/components/sections/Recognition";
@@ -31,11 +32,12 @@ export default function App() {
   return (
     <SmoothScrollProvider>
       <CustomCursor />
+      <PhotoGhost />
       <Nav />
       <main className="relative min-h-screen bg-canvas text-ink">
         <HeroWrapper />
         <Journey />
-        <Projects />
+        <WorkGallery />
         <WhatYouGet />
         <Services />
         <Recognition />
