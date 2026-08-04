@@ -3,6 +3,7 @@ import { Nav } from "@/components/Nav";
 import { CustomCursor } from "@/components/CustomCursor";
 import { Preloader } from "@/components/Preloader";
 import { PhotoGhost } from "@/components/PhotoGhost";
+import { MotionBackground } from "@/components/MotionBackground";
 import { Hero } from "@/components/sections/Hero";
 import { Journey } from "@/components/sections/Journey";
 import { WorkGallery } from "@/components/sections/WorkGallery";
@@ -35,6 +36,7 @@ export default function App() {
     <SmoothScrollProvider>
       <Preloader />
       <CustomCursor />
+      <MotionBackground />
       <PhotoGhost />
       <Nav />
       <main className="relative min-h-screen bg-canvas text-ink">

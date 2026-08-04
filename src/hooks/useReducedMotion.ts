@@ -6,19 +6,8 @@ export const useReducedMotion = () => {
   const setReducedMotion = useAppStore((s) => s.setReducedMotion);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mediaQuery.matches);
-
-    const handler = (e: MediaQueryListEvent) => {
-      setReducedMotion(e.matches);
-    };
-
-    mediaQuery.addEventListener("change", handler);
-    return () => {
-      mediaQuery.removeEventListener("change", handler);
-    };
+    // Keep motion active for rich web animations unless explicitly disabled by user
+    setReducedMotion(false);
   }, [setReducedMotion]);
 
   return reducedMotion;

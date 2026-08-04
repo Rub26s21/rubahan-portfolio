@@ -5,6 +5,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { PROJECTS } from "@/lib/data";
 import { WORK_OUTCOMES } from "@/lib/site-copy";
 import { SectionHeading } from "@/components/SectionHeading";
+import { Card3D } from "@/components/Card3D";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -135,82 +136,83 @@ export const WorkGallery: React.FC = () => {
               const outcome = outcomeInfo ? outcomeInfo.outcome : project.tagline;
 
               return (
-                <div
-                  key={project.id}
-                  ref={(el) => { cardsRef.current[idx] = el; }}
-                  tabIndex={0}
-                  onClick={() => handleActivateProject(project.github)}
-                  onKeyDown={(e) => handleKeyDown(e, project.github)}
-                  onMouseEnter={() => {
-                    setHoveredIdx(idx);
-                    setCursorLabel("open");
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredIdx(null);
-                    setCursorLabel("");
-                  }}
-                  className={`w-[60vw] max-w-[580px] h-[420px] p-8 bg-[#10283f] rounded-2xl border border-[#8FB3C7]/20 shadow-2xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform focus:outline-none focus:ring-2 focus:ring-sky ${
-                    hoveredIdx !== null && hoveredIdx !== idx
-                      ? "opacity-40 scale-95"
-                      : "opacity-100"
-                  }`}
-                  style={{
-                    borderTop: `4px solid ${project.accent}`,
-                  }}
-                  aria-label={`Open ${project.title} on GitHub. Outcome: ${outcome}`}
-                >
-                  {/* Top Bar: Sky Number Chip & Domain */}
-                  <div>
-                    <div className="flex items-center justify-between gap-4 mb-4">
-                      <span className="px-3 py-1 bg-sky/10 text-sky text-xs font-mono font-bold rounded-full border border-sky/20">
-                        {project.index}
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-[#8FB3C7]">
-                        {project.domain} · {project.year}
-                      </span>
-                    </div>
-
-                    <h3 className="font-heading text-2xl font-bold text-[#F6FAFD] leading-snug group-hover:text-sky transition-colors duration-300 mb-2">
-                      {project.title}
-                    </h3>
-                    <p className="text-xs md:text-sm text-[#8FB3C7] font-medium leading-relaxed">
-                      {outcome}
-                    </p>
-                  </div>
-
-                  {/* Impact grid */}
-                  <div className="grid grid-cols-3 gap-3 border-y border-[#8FB3C7]/15 py-4 my-2">
-                    {project.impact.slice(0, 3).map((imp, i) => (
-                      <div key={i} className="flex flex-col">
-                        <span className="font-heading text-base font-bold text-[#F6FAFD]">
-                          {imp.value}
+                <Card3D key={project.id}>
+                  <div
+                    ref={(el) => { cardsRef.current[idx] = el; }}
+                    tabIndex={0}
+                    onClick={() => handleActivateProject(project.github)}
+                    onKeyDown={(e) => handleKeyDown(e, project.github)}
+                    onMouseEnter={() => {
+                      setHoveredIdx(idx);
+                      setCursorLabel("open");
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredIdx(null);
+                      setCursorLabel("");
+                    }}
+                    className={`w-[60vw] max-w-[580px] h-[420px] p-8 bg-[#10283f] rounded-2xl border border-[#8FB3C7]/20 shadow-2xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform focus:outline-none focus:ring-2 focus:ring-sky ${
+                      hoveredIdx !== null && hoveredIdx !== idx
+                        ? "opacity-40 scale-95"
+                        : "opacity-100"
+                    }`}
+                    style={{
+                      borderTop: `4px solid ${project.accent}`,
+                    }}
+                    aria-label={`Open ${project.title} on GitHub. Outcome: ${outcome}`}
+                  >
+                    {/* Top Bar: Sky Number Chip & Domain */}
+                    <div>
+                      <div className="flex items-center justify-between gap-4 mb-4">
+                        <span className="px-3 py-1 bg-sky/10 text-sky text-xs font-mono font-bold rounded-full border border-sky/20">
+                          {project.index}
                         </span>
-                        <span className="text-[9px] font-mono text-[#8FB3C7] leading-tight">
-                          {imp.label}
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-[#8FB3C7]">
+                          {project.domain} · {project.year}
                         </span>
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Bottom Bar: Tag Chips & Action */}
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {chips.slice(0, 3).map((chip, i) => (
-                        <span
-                          key={i}
-                          className="px-2.5 py-0.5 border border-[#8FB3C7]/20 text-[#8FB3C7] text-[9px] font-mono rounded-full"
-                        >
-                          {chip}
-                        </span>
+                      <h3 className="font-heading text-2xl font-bold text-[#F6FAFD] leading-snug group-hover:text-sky transition-colors duration-300 mb-2">
+                        {project.title}
+                      </h3>
+                      <p className="text-xs md:text-sm text-[#8FB3C7] font-medium leading-relaxed">
+                        {outcome}
+                      </p>
+                    </div>
+
+                    {/* Impact grid */}
+                    <div className="grid grid-cols-3 gap-3 border-y border-[#8FB3C7]/15 py-4 my-2">
+                      {project.impact.slice(0, 3).map((imp, i) => (
+                        <div key={i} className="flex flex-col">
+                          <span className="font-heading text-base font-bold text-[#F6FAFD]">
+                            {imp.value}
+                          </span>
+                          <span className="text-[9px] font-mono text-[#8FB3C7] leading-tight">
+                            {imp.label}
+                          </span>
+                        </div>
                       ))}
                     </div>
 
-                    <div className="flex items-center gap-1 text-sky font-mono text-xs font-semibold group-hover:translate-x-1 transition-transform">
-                      <span>GitHub</span>
-                      <span>↗</span>
+                    {/* Bottom Bar: Tag Chips & Action */}
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {chips.slice(0, 3).map((chip, i) => (
+                          <span
+                            key={i}
+                            className="px-2.5 py-0.5 border border-[#8FB3C7]/20 text-[#8FB3C7] text-[9px] font-mono rounded-full"
+                          >
+                            {chip}
+                          </span>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-1 text-sky font-mono text-xs font-semibold group-hover:translate-x-1 transition-transform">
+                        <span>GitHub</span>
+                        <span>↗</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Card3D>
               );
             })}
           </div>

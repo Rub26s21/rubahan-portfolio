@@ -3,9 +3,7 @@ import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import { useAppStore } from "@/lib/store";
 
-// Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
 const SmoothScrollContext = createContext<Lenis | null>(null);
@@ -18,28 +16,22 @@ export interface SmoothScrollProviderProps {
 
 export const SmoothScrollProvider: React.FC<SmoothScrollProviderProps> = ({ children }) => {
   const lenisRef = useRef<Lenis | null>(null);
-  const reducedMotion = useAppStore((s) => s.reducedMotion);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // If reduced motion is requested, do not run smooth scroll
-    if (reducedMotion) {
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-        lenisRef.current = null;
-      }
-      return;
-    }
-
+    // Ultra-smooth oil scrolling configuration
     const lenis = new Lenis({
-      lerp: 0.09,
-      syncTouch: true,
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
     });
 
     lenisRef.current = lenis;
 
-    // Update ScrollTrigger on Lenis scroll
+    // Synchronize ScrollTrigger on Lenis scroll
     lenis.on("scroll", () => {
       ScrollTrigger.update();
     });
@@ -57,7 +49,7 @@ export const SmoothScrollProvider: React.FC<SmoothScrollProviderProps> = ({ chil
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, [reducedMotion]);
+  }, []);
 
   return (
     <SmoothScrollContext.Provider value={lenisRef.current}>
