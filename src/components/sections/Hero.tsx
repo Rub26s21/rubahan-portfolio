@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
 import { HERO_COPY } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
@@ -9,10 +9,9 @@ import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
 import { Sparkles, ShieldCheck, Target, Hammer, Zap } from "lucide-react";
 
 // ==========================================
-// FAST, SNAPPY FRAMER MOTION VARIANTS
+// CINEMATIC FRAMER MOTION VARIANTS
 // ==========================================
 
-// Master Container Orchestrator
 const containerVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -26,7 +25,7 @@ const containerVariants: Variants = {
   },
 };
 
-// Phase 1: Backdrop Display Text ("RUBAHAN") — 0.6s easeOut
+// Phase 1: Backdrop Display Text ("RUBAHAN") — Dramatic 1.6s Cinematic Duration
 const backgroundTextVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -38,7 +37,7 @@ const backgroundTextVariants: Variants = {
     scale: 1.0,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 1.6,
       ease: [0.16, 1, 0.3, 1], // easeOut
     },
   },
@@ -166,6 +165,17 @@ const uiItemVariants: Variants = {
 
 export const Hero: React.FC = () => {
   const lenis = useSmoothScroll();
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const threshold = window.innerHeight * 0.7;
+      setScrolledPastHero(window.scrollY > threshold);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleScrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -185,44 +195,48 @@ export const Hero: React.FC = () => {
       animate="show"
       className="relative min-h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-8 px-6 md:px-12 select-none z-10 overflow-hidden"
     >
-      {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" (z-0) ── */}
+      {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" (Full Visibility text-[17vw], Icy Blue #38BDF8) ── */}
       <motion.div
         variants={backgroundTextVariants}
-        className="absolute top-2 left-0 w-full text-center font-heading font-extrabold text-[22vw] leading-none text-[#CCFF00] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
+        className="absolute top-4 left-0 w-full text-center font-heading font-extrabold text-[17vw] leading-none text-[#38BDF8] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
         style={{
-          textShadow: "0 10px 40px rgba(204,255,0,0.25)",
+          textShadow: "0 10px 40px rgba(56,189,248,0.25)",
         }}
       >
         RUBAHAN
       </motion.div>
 
-      {/* ── PHASE 3: SINGLE CLEAN HORIZONTAL TOP NAVIGATION BAR (z-20) ── */}
+      {/* ── PHASE 3: HORIZONTAL TOP NAVIGATION BAR (Hides seamlessly when scrolled past Hero) ── */}
       <motion.div
         variants={uiItemVariants}
-        className="w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-4 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33]"
+        animate={{ opacity: scrolledPastHero ? 0 : 1, y: scrolledPastHero ? -20 : 0 }}
+        transition={{ duration: 0.3 }}
+        className={`w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-4 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33] ${
+          scrolledPastHero ? "pointer-events-none" : "pointer-events-auto"
+        }`}
       >
         <div className="flex gap-6 items-center">
-          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#88A000] transition-colors cursor-pointer">HOME</button>
+          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">HOME</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("about")} className="hover:text-[#88A000] transition-colors cursor-pointer">ABOUT ME</button>
+          <button onClick={() => handleScrollTo("about")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">ABOUT ME</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#88A000] transition-colors cursor-pointer">PROJECTS</button>
+          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">PROJECTS</button>
         </div>
 
         <div className="flex gap-6 items-center">
-          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#88A000] transition-colors cursor-pointer">WHAT YOU GET</button>
+          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">WHAT YOU GET</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("services")} className="hover:text-[#88A000] transition-colors cursor-pointer">SERVICES</button>
+          <button onClick={() => handleScrollTo("services")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">SERVICES</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("process")} className="hover:text-[#88A000] transition-colors cursor-pointer">PROCESS</button>
+          <button onClick={() => handleScrollTo("process")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">PROCESS</button>
           <span>|</span>
-          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#88A000] transition-colors cursor-pointer">FAQ</button>
+          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">FAQ</button>
         </div>
       </motion.div>
 
       {/* ── CENTER LAYOUT CONTAINER ── */}
       <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-12">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT CUTOUT (No Background Box, z-10) ── */}
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (No Background Plate/Container, z-10) ── */}
         <motion.div
           variants={portraitVariants}
           className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] z-10 will-change-transform"
@@ -251,8 +265,8 @@ export const Hero: React.FC = () => {
           >
             {/* Card 1: 5 Flagship Projects */}
             <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
-              <div className="w-12 h-12 rounded-xl bg-[#CCFF00] flex items-center justify-center text-[#0B1F33] font-bold text-xl shadow-md">
-                <Sparkles className="w-6 h-6 fill-current" />
+              <div className="w-12 h-12 rounded-xl bg-[#38BDF8] flex items-center justify-center text-[#0B1F33] font-bold text-xl shadow-md">
+                <Sparkles className="w-6 h-6 fill-current text-[#0B1F33]" />
               </div>
               <div className="flex flex-col font-mono">
                 <div className="font-heading font-bold text-lg text-[#0B1F33] leading-none">
@@ -266,7 +280,7 @@ export const Hero: React.FC = () => {
 
             {/* Card 2: 3+ Years of Experience */}
             <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-1 w-52">
-              <div className="font-heading font-bold text-3xl text-[#CCFF00] drop-shadow-sm leading-none">
+              <div className="font-heading font-bold text-3xl text-[#38BDF8] drop-shadow-sm leading-none">
                 <CountUp end={3} />+
               </div>
               <span className="font-mono text-[10px] text-[#0B1F33]/80 font-bold uppercase tracking-wider">
@@ -281,24 +295,24 @@ export const Hero: React.FC = () => {
             className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 pointer-events-auto"
           >
             <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0B1F33] border-b border-black/10 pb-2">
-              <Zap className="w-4 h-4 text-[#CCFF00] fill-current" />
+              <Zap className="w-4 h-4 text-[#38BDF8] fill-current" />
               <span>TRAITS</span>
             </div>
             <ul className="flex flex-col gap-2 font-mono text-xs font-bold text-[#0B1F33]">
               <li className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#88A000]" /> Creative
+                <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" /> Creative
               </li>
               <li className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#88A000]" /> Reliable
+                <ShieldCheck className="w-3.5 h-3.5 text-[#38BDF8]" /> Reliable
               </li>
               <li className="flex items-center gap-2">
-                <Target className="w-3.5 h-3.5 text-[#88A000]" /> Strategist
+                <Target className="w-3.5 h-3.5 text-[#38BDF8]" /> Strategist
               </li>
               <li className="flex items-center gap-2">
-                <Hammer className="w-3.5 h-3.5 text-[#88A000]" /> Builder
+                <Hammer className="w-3.5 h-3.5 text-[#38BDF8]" /> Builder
               </li>
               <li className="flex items-center gap-2">
-                <Zap className="w-3.5 h-3.5 text-[#88A000]" /> Efficient
+                <Zap className="w-3.5 h-3.5 text-[#38BDF8]" /> Efficient
               </li>
             </ul>
           </motion.div>
@@ -311,12 +325,12 @@ export const Hero: React.FC = () => {
             >
               <div>Engineering,</div>
               <div>Applied</div>
-              <div className="font-serif italic text-[#CCFF00] drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+              <div className="font-serif italic text-[#38BDF8] drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
                 Differently.
               </div>
             </motion.h1>
 
-            {/* NEON YELLOW ACTION BUTTONS */}
+            {/* ICY LIGHT BLUE ACTION BUTTONS */}
             <motion.div
               variants={ctaButtonVariants}
               className="flex items-center justify-center gap-4 pointer-events-auto"
@@ -324,7 +338,7 @@ export const Hero: React.FC = () => {
               <Magnetic>
                 <a
                   href={`mailto:${PROFILE.email}`}
-                  className="px-8 py-3.5 bg-[#CCFF00] text-[#0B1F33] hover:bg-black hover:text-[#CCFF00] rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
+                  className="px-8 py-3.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
                 >
                   Let's Talk
                 </a>
@@ -333,7 +347,7 @@ export const Hero: React.FC = () => {
               <Magnetic>
                 <button
                   onClick={() => handleScrollTo("about")}
-                  className="px-8 py-3.5 bg-[#CCFF00] text-[#0B1F33] hover:bg-black hover:text-[#CCFF00] rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
+                  className="px-8 py-3.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
                 >
                   About Me
                 </button>
