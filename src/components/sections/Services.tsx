@@ -25,7 +25,7 @@ export const Services: React.FC = () => {
     if (reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // 1. CONVERGENT CARDS ANIMATION
+      // 1. THE 3 SERVICE CARDS CONVERGE (120ms stagger)
       cardsRef.current.forEach((card, idx) => {
         if (!card) return;
 
@@ -40,8 +40,8 @@ export const Services: React.FC = () => {
             x: 0,
             y: 0,
             opacity: 1,
-            duration: 0.8,
-            delay: idx * 0.1,
+            duration: 0.85,
+            delay: idx * 0.12,
             ease: "power3.out",
             scrollTrigger: {
               trigger: card,
@@ -52,20 +52,20 @@ export const Services: React.FC = () => {
         );
       });
 
-      // 2. CTA BAND UNMASK
+      // 2. CTA BAND LINE-BY-LINE UNMASK
       if (ctaTitleRef.current) {
         const split = new SplitText(ctaTitleRef.current, {
-          type: "lines,words",
+          type: "lines",
           linesClass: "line-mask",
         });
 
         gsap.fromTo(
-          split.words,
+          split.lines,
           { yPercent: 110 },
           {
             yPercent: 0,
-            duration: 0.8,
-            stagger: 0.04,
+            duration: 0.85,
+            stagger: 0.1,
             ease: "power4.out",
             scrollTrigger: {
               trigger: ctaBandRef.current,
@@ -92,7 +92,7 @@ export const Services: React.FC = () => {
           Focused engineering offers with zero fluff — built for teams, clubs, and projects that need results.
         </p>
 
-        {/* 3 Convergent Services Decks */}
+        {/* 3 Convergent Services Decks (120ms Stagger) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-28">
           {SERVICES.map((service, idx) => {
             const isFree = service.price === "Free";
@@ -151,7 +151,7 @@ export const Services: React.FC = () => {
           })}
         </div>
 
-        {/* Full-Viewport-Width CTA Band with Giant Display Text & Amber Hover */}
+        {/* FULL-VIEWPORT CTA BAND STATEMENT */}
         <div
           ref={ctaBandRef}
           className="w-full bg-[#0B1F33] text-surface rounded-3xl p-10 md:p-20 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl overflow-hidden relative"
@@ -162,7 +162,7 @@ export const Services: React.FC = () => {
             </span>
             <h3
               ref={ctaTitleRef}
-              className="font-heading text-[clamp(2.5rem,6vw,5rem)] font-bold text-white leading-[0.95] tracking-tight will-change-transform"
+              className="font-heading text-[clamp(2.5rem,7vw,6rem)] font-bold text-white leading-[0.95] tracking-tight will-change-transform"
             >
               {CTA_COPY.line}
             </h3>
