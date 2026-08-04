@@ -8,45 +8,43 @@ import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
 import { Sparkles, ShieldCheck, Target, Hammer, Zap } from "lucide-react";
 
 // ==========================================
-// CINEMATIC FRAMER MOTION VARIANTS
+// CINEMATIC 5.0+ SECOND MOTION TIMELINE
 // ==========================================
 
 const containerVariants: Variants = {
-  hidden: {
-    opacity: 0,
-  },
+  hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.05,
+      staggerChildren: 0.6,
+      delayChildren: 0.2,
     },
   },
 };
 
-// Phase 1: Backdrop Display Text ("RUBAHAN") — 1.6s Cinematic Duration
+// Phase 1: Backdrop Display Text ("RUBAHAN") — 1.8s Cinematic Ease
 const backgroundTextVariants: Variants = {
   hidden: {
     opacity: 0,
-    scale: 1.1,
-    y: -20,
+    scale: 1.08,
+    y: -25,
   },
   show: {
     opacity: 1,
     scale: 1.0,
     y: 0,
     transition: {
-      duration: 1.6,
+      duration: 1.8,
       ease: [0.16, 1, 0.3, 1], // easeOut
     },
   },
 };
 
-// Phase 2: Subject Hero Portrait Cutout — 0.5s slide-up
+// Phase 2: Subject Hero Portrait Cutout — 1.4s Smooth Rise
 const portraitVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 100,
+    y: 90,
     scale: 0.95,
   },
   show: {
@@ -54,30 +52,30 @@ const portraitVariants: Variants = {
     y: 0,
     scale: 1.0,
     transition: {
-      duration: 0.5,
+      duration: 1.4,
       ease: [0.16, 1, 0.3, 1],
     },
   },
 };
 
-// Phase 3: Interface Container (Rapid-fire cascade stagger: 0.06s)
+// Phase 3: Interface Container (Staggered over 2.0s)
 const uiContainerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.02,
+      staggerChildren: 0.25,
+      delayChildren: 0.2,
     },
   },
 };
 
-// Floating Left Stats Cards
+// Floating Left Stats Cards (1.2s Spring ease)
 const leftCardVariants: Variants = {
   hidden: {
     opacity: 0,
-    x: -80,
-    scale: 0.85,
+    x: -70,
+    scale: 0.88,
   },
   show: {
     opacity: 1,
@@ -85,18 +83,18 @@ const leftCardVariants: Variants = {
     scale: 1.0,
     transition: {
       type: "spring",
-      stiffness: 120,
-      damping: 12,
+      stiffness: 70,
+      damping: 14,
     },
   },
 };
 
-// Floating Right Traits Glass Card
+// Floating Right Traits Glass Card (1.2s Spring ease)
 const rightCardVariants: Variants = {
   hidden: {
     opacity: 0,
-    x: 80,
-    scale: 0.85,
+    x: 70,
+    scale: 0.88,
   },
   show: {
     opacity: 1,
@@ -104,35 +102,35 @@ const rightCardVariants: Variants = {
     scale: 1.0,
     transition: {
       type: "spring",
-      stiffness: 120,
-      damping: 12,
+      stiffness: 70,
+      damping: 14,
     },
   },
 };
 
-// Headline Overlay Lines
+// Headline Overlay Lines (1.2s Spring ease)
 const headlineVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 35,
+    y: 40,
   },
   show: {
     opacity: 1,
     y: 0,
     transition: {
       type: "spring",
-      stiffness: 120,
-      damping: 12,
+      stiffness: 80,
+      damping: 14,
     },
   },
 };
 
-// Action Buttons Spring Pop
+// Action Buttons Spring Pop (1.0s Spring pop)
 const ctaButtonVariants: Variants = {
   hidden: {
     opacity: 0,
-    scale: 0.5,
-    y: 20,
+    scale: 0.6,
+    y: 25,
   },
   show: {
     opacity: 1,
@@ -140,13 +138,13 @@ const ctaButtonVariants: Variants = {
     y: 0,
     transition: {
       type: "spring",
-      stiffness: 140,
+      stiffness: 90,
       damping: 12,
     },
   },
 };
 
-// Navigation Links & Editorial Footer Copy
+// Navigation Links & Editorial Footer Copy (1.0s Fade)
 const uiItemVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -156,7 +154,7 @@ const uiItemVariants: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.4,
+      duration: 1.0,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -197,7 +195,7 @@ export const Hero: React.FC = () => {
       {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" ── */}
       <motion.div
         variants={backgroundTextVariants}
-        className="absolute top-2 left-0 w-full text-center font-heading font-extrabold text-[17vw] leading-none text-[#38BDF8] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
+        className="absolute top-6 left-0 w-full text-center font-heading font-extrabold text-[16vw] leading-none text-[#38BDF8] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
         style={{
           textShadow: "0 10px 40px rgba(56,189,248,0.25)",
         }}
@@ -233,17 +231,17 @@ export const Hero: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* ── CENTER LAYOUT CONTAINER (Full size image anchored at section bottom) ── */}
-      <div className="relative w-full max-w-6xl mx-auto flex-1 flex items-end justify-center z-10 pt-8 pb-0">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Full size cutout, anchored at bottom) ── */}
+      {/* ── CENTER LAYOUT CONTAINER (Perfect Proportion Ratio) ── */}
+      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-2">
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Perfect Proportioned Cutout, Scale 1.15, Head Unclipped) ── */}
         <motion.div
           variants={portraitVariants}
-          className="relative w-[360px] sm:w-[460px] md:w-[560px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden"
+          className="relative w-[300px] sm:w-[380px] md:w-[440px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden"
         >
           <img
             src="/photo-cutout.png"
             alt="Rubahan P"
-            className="w-full h-full object-contain object-bottom select-none scale-[1.5] origin-bottom"
+            className="w-full h-full object-contain object-bottom select-none scale-[1.15] origin-bottom"
           />
         </motion.div>
 
@@ -312,10 +310,10 @@ export const Hero: React.FC = () => {
           </motion.div>
 
           {/* OVERLAY HEADLINE & ACTION BUTTONS ON TORSO ── */}
-          <div className="absolute inset-x-0 bottom-10 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-8 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
             <motion.h1
               variants={headlineVariants}
-              className="font-heading font-extrabold text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight text-white leading-[0.9] mb-6 pointer-events-auto"
+              className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-5 pointer-events-auto"
             >
               <div>Engineering,</div>
               <div>Applied</div>
@@ -351,7 +349,7 @@ export const Hero: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY (z-20) ── */}
+      {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY ── */}
       <motion.div
         variants={uiItemVariants}
         className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
