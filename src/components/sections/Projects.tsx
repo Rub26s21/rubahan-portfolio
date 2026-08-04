@@ -32,7 +32,7 @@ export const Projects: React.FC = () => {
     }
   };
 
-  // DESKTOP: PINNED HORIZONTAL GALLERY & DARK THEME LERPING
+  // DESKTOP: PINNED HORIZONTAL GALLERY & DARK THEME TOGGLE
   useEffect(() => {
     const section = sectionRef.current;
     const track = trackRef.current;
@@ -42,7 +42,7 @@ export const Projects: React.FC = () => {
       // Calculate total horizontal scroll distance
       const totalScrollWidth = track.scrollWidth - window.innerWidth + 320;
 
-      // 1. PIN, HORIZONTAL TRACK TRANSLATION & DARK THEME LERPING (#F6FAFD <-> #0B1F33)
+      // 1. PIN & HORIZONTAL TRACK TRANSLATION WITH theme-dark TOGGLE
       const pinTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -51,45 +51,8 @@ export const Projects: React.FC = () => {
           pin: true,
           pinSpacing: true,
           scrub: 0.8,
-          onEnter: () => {
-            gsap.to(document.documentElement, {
-              "--color-canvas": "#0B1F33",
-              "--color-surface": "#0C233B",
-              "--color-ink": "#FFFFFF",
-              "--color-mist": "#8FB3C7",
-              duration: 0.6,
-              ease: "power2.out",
-            });
-          },
-          onLeave: () => {
-            gsap.to(document.documentElement, {
-              "--color-canvas": "#F6FAFD",
-              "--color-surface": "#FFFFFF",
-              "--color-ink": "#0B1F33",
-              "--color-mist": "#8FB3C7",
-              duration: 0.6,
-              ease: "power2.out",
-            });
-          },
-          onEnterBack: () => {
-            gsap.to(document.documentElement, {
-              "--color-canvas": "#0B1F33",
-              "--color-surface": "#0C233B",
-              "--color-ink": "#FFFFFF",
-              "--color-mist": "#8FB3C7",
-              duration: 0.6,
-              ease: "power2.out",
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to(document.documentElement, {
-              "--color-canvas": "#F6FAFD",
-              "--color-surface": "#FFFFFF",
-              "--color-ink": "#0B1F33",
-              "--color-mist": "#8FB3C7",
-              duration: 0.6,
-              ease: "power2.out",
-            });
+          onToggle: (self) => {
+            document.documentElement.classList.toggle("theme-dark", self.isActive);
           },
           onRefresh: () => {
             ScrollTrigger.update();
@@ -142,17 +105,11 @@ export const Projects: React.FC = () => {
 
     return () => {
       ctx.revert();
-      gsap.to(document.documentElement, {
-        "--color-canvas": "#F6FAFD",
-        "--color-surface": "#FFFFFF",
-        "--color-ink": "#0B1F33",
-        "--color-mist": "#8FB3C7",
-        duration: 0.1,
-      });
+      document.documentElement.classList.remove("theme-dark");
     };
   }, [reducedMotion, isDesktop]);
 
-  // MOBILE: DARK THEME LERPING ON SCROLL (<=768px)
+  // MOBILE: DARK THEME TOGGLE ON SCROLL (<=768px)
   useEffect(() => {
     const section = sectionRef.current;
     if (!section || reducedMotion || isDesktop) return;
@@ -161,57 +118,14 @@ export const Projects: React.FC = () => {
       trigger: section,
       start: "top 60%",
       end: "bottom 40%",
-      onEnter: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#0B1F33",
-          "--color-surface": "#0C233B",
-          "--color-ink": "#FFFFFF",
-          "--color-mist": "#8FB3C7",
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      },
-      onLeave: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#F6FAFD",
-          "--color-surface": "#FFFFFF",
-          "--color-ink": "#0B1F33",
-          "--color-mist": "#8FB3C7",
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      },
-      onEnterBack: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#0B1F33",
-          "--color-surface": "#0C233B",
-          "--color-ink": "#FFFFFF",
-          "--color-mist": "#8FB3C7",
-          duration: 0.6,
-          ease: "power2.out",
-        });
-      },
-      onLeaveBack: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#F6FAFD",
-          "--color-surface": "#FFFFFF",
-          "--color-ink": "#0B1F33",
-          "--color-mist": "#8FB3C7",
-          duration: 0.6,
-          ease: "power2.out",
-        });
+      onToggle: (self) => {
+        document.documentElement.classList.toggle("theme-dark", self.isActive);
       },
     });
 
     return () => {
       trigger.kill();
-      gsap.to(document.documentElement, {
-        "--color-canvas": "#F6FAFD",
-        "--color-surface": "#FFFFFF",
-        "--color-ink": "#0B1F33",
-        "--color-mist": "#8FB3C7",
-        duration: 0.1,
-      });
+      document.documentElement.classList.remove("theme-dark");
     };
   }, [reducedMotion, isDesktop]);
 

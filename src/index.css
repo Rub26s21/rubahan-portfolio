@@ -74,7 +74,21 @@
   --font-mono: 'Spline Sans Mono', monospace;
 }
 
-/* BASE LAYER (Light theme only) */
+/* THEME TRANSITION & DARK MODE INVERSION */
+html {
+  background-color: var(--color-canvas);
+  transition: background-color 0.6s ease, color 0.6s ease;
+  overflow-x: clip;
+}
+
+html.theme-dark {
+  --color-canvas: #0B1F33;
+  --color-surface: #10283f;
+  --color-ink: #F6FAFD;
+  --color-mist: #7f9fb3;
+}
+
+/* BASE LAYER */
 @layer base {
   body {
     background-color: var(--color-canvas);
@@ -83,6 +97,8 @@
     margin: 0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+    transition: background-color 0.6s ease, color 0.6s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {

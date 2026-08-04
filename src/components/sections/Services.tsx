@@ -84,9 +84,9 @@ export const Services: React.FC = () => {
     <section
       id="services"
       ref={containerRef}
-      className="relative min-h-screen w-full bg-canvas pt-28 select-none z-10"
+      className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10"
     >
-      <div className="max-w-4xl mx-auto px-6 md:pl-72 md:pr-12">
+      <div className="max-w-4xl mx-auto">
         <SectionHeading eyebrow="Services" title="Solutions That Deliver" />
         <p className="text-mist font-mono text-xs md:text-sm mt-4 mb-16 max-w-xl">
           Focused engineering offers with zero fluff — built for teams, clubs, and projects that need results.
@@ -150,34 +150,38 @@ export const Services: React.FC = () => {
             );
           })}
         </div>
-      </div>
 
-      {/* FULL-BLEED STATEMENT SECTION (100vw wide, min-h-[70vh], ink #0B1F33 background) */}
-      <div
-        ref={ctaBandRef}
-        className="w-full min-h-[70vh] bg-[#0B1F33] text-surface py-20 px-6 md:pl-72 md:pr-12 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl overflow-hidden relative"
-      >
-        <div className="max-w-2xl text-center md:text-left">
-          <span className="font-mono text-xs uppercase tracking-[0.25em] text-mist mb-4 block font-semibold">
-            Get In Touch
-          </span>
-          <h3
-            ref={ctaTitleRef}
-            className="font-heading text-[clamp(2.5rem,7vw,6rem)] font-bold text-white leading-[0.95] tracking-tight will-change-transform"
-          >
-            {CTA_COPY.line}
-          </h3>
-        </div>
-
-        <div className="shrink-0">
-          <Magnetic>
-            <a
-              href={`mailto:${PROFILE.email}`}
-              className="px-10 py-5 bg-sky text-ink font-heading font-bold text-xl md:text-2xl rounded-full transition-all duration-300 shadow-2xl cursor-pointer block hover:bg-[#FFB86B] hover:text-ink hover:scale-105"
+        {/* FULL-BLEED STATEMENT CTA BAND (width: 100vw; margin-inline: calc(50% - 50vw)) */}
+        <div
+          ref={ctaBandRef}
+          className="bg-[#0B1F33] text-surface py-20 px-6 md:pl-72 md:pr-12 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl overflow-hidden relative"
+          style={{
+            width: "100vw",
+            marginInline: "calc(50% - 50vw)",
+          }}
+        >
+          <div className="max-w-2xl text-center md:text-left">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-mist mb-4 block font-semibold">
+              Get In Touch
+            </span>
+            <h3
+              ref={ctaTitleRef}
+              className="font-heading text-[clamp(2.5rem,7vw,6rem)] font-bold text-white leading-[0.95] tracking-tight will-change-transform"
             >
-              {CTA_COPY.button}
-            </a>
-          </Magnetic>
+              {CTA_COPY.line}
+            </h3>
+          </div>
+
+          <div className="shrink-0">
+            <Magnetic>
+              <a
+                href={`mailto:${PROFILE.email}`}
+                className="px-10 py-5 bg-sky text-ink font-heading font-bold text-xl md:text-2xl rounded-full transition-all duration-300 shadow-2xl cursor-pointer block hover:bg-[#FFB86B] hover:text-ink hover:scale-105"
+              >
+                {CTA_COPY.button}
+              </a>
+            </Magnetic>
+          </div>
         </div>
       </div>
     </section>
