@@ -231,17 +231,17 @@ export const Hero: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* ── CENTER LAYOUT CONTAINER (Perfect Proportion Ratio) ── */}
-      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-0">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Perfect Proportioned Cutout, Scale 1.15, Head Unclipped) ── */}
+      {/* ── CENTER LAYOUT CONTAINER (Profile picture touches bottom edge) ── */}
+      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-12 pb-0">
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Profile pic touches bottom edge of section) ── */}
         <motion.div
           variants={portraitVariants}
-          className="relative w-[300px] sm:w-[380px] md:w-[440px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden"
+          className="relative w-[320px] sm:w-[400px] md:w-[460px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden pb-0 mb-0"
         >
           <img
             src="/photo-cutout.png"
             alt="Rubahan P"
-            className="w-full h-full object-contain object-bottom select-none scale-[1.15] origin-bottom"
+            className="w-full h-full object-contain object-bottom select-none scale-[1.25] origin-bottom"
           />
         </motion.div>
 
@@ -310,7 +310,7 @@ export const Hero: React.FC = () => {
           </motion.div>
 
           {/* OVERLAY HEADLINE & ACTION BUTTONS ON TORSO ── */}
-          <div className="absolute inset-x-0 bottom-8 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
+          <div className="absolute inset-x-0 bottom-24 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
             <motion.h1
               variants={headlineVariants}
               className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-5 pointer-events-auto"
@@ -349,19 +349,19 @@ export const Hero: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY (Flush at bottom, ZERO empty gap below) ── */}
+      {/* ── PHASE 3: EDITORIAL COPY (Positioned floating ABOVE the bottom of the landing page section) ── */}
       <motion.div
         variants={uiItemVariants}
-        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 pb-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
+        className="w-full max-w-7xl mx-auto flex justify-between items-end z-30 -mt-16 pb-4 font-mono text-xs text-[#0B1F33]/90 leading-relaxed border-t border-black/10 pointer-events-auto"
       >
-        <div className="max-w-xs font-bold">
+        <div className="max-w-xs font-bold bg-[#E1DDD3]/80 backdrop-blur-xs px-2 py-1 rounded-md">
           <p className="text-[#0B1F33] font-heading text-sm font-bold">
             {HERO_COPY.eyebrow}
           </p>
         </div>
 
-        <div className="max-w-xs text-right hidden sm:block">
-          <p className="text-[11px] text-[#0B1F33]/80">
+        <div className="max-w-xs text-right hidden sm:block bg-[#E1DDD3]/80 backdrop-blur-xs px-2 py-1 rounded-md">
+          <p className="text-[11px] text-[#0B1F33]/90 font-medium">
             {HERO_COPY.intro}
           </p>
         </div>
