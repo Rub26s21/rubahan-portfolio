@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import { HERO_COPY } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
@@ -163,7 +163,6 @@ const uiItemVariants: Variants = {
 export const Hero: React.FC = () => {
   const lenis = useSmoothScroll();
   const trackRef = useRef<HTMLDivElement>(null);
-  const [activeSection, setActiveSection] = useState("hero");
 
   // Scroll Progress Tracking across dedicated 300vh scroll track
   const { scrollYProgress } = useScroll({
@@ -191,32 +190,6 @@ export const Hero: React.FC = () => {
   // 4. Navigation Morph: Top Horizontal Bar -> Fixed Left Vertical Sidebar (0.35 -> 0.65)
   const topNavOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
   const topNavY = useTransform(scrollYProgress, [0, 0.25], [0, -25]);
-
-  const sidebarOpacity = useTransform(scrollYProgress, [0.35, 0.65], [0, 1]);
-  const sidebarX = useTransform(scrollYProgress, [0.35, 0.65], [-50, 0]);
-
-  // Scroll-Spy Active Section Detection
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ["hero", "about", "projects", "what-you-get", "services", "process", "faq"];
-      const scrollPos = window.scrollY + window.innerHeight * 0.35;
-
-      for (const section of sections) {
-        const el = document.getElementById(section);
-        if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPos >= top && scrollPos < top + height) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleScrollTo = (id: string) => {
     const el = document.getElementById(id);
