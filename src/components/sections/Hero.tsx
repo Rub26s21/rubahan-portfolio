@@ -349,10 +349,10 @@ export const Hero: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY ── */}
+      {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY (Shifted 5-6cm Upwards) ── */}
       <motion.div
         variants={uiItemVariants}
-        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-2 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
+        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 -mt-16 pb-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
       >
         <div className="max-w-xs font-bold">
           <p className="text-[#0B1F33] font-heading text-sm font-bold">
