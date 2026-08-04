@@ -26,16 +26,16 @@ export const WhatYouGet: React.FC = () => {
     if (reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // 1. HEADING SKEW & OVERLOAD ENTRANCE
+      // 1. HEADING SKEW (6°->0°) & SCALEY OVERSHOOT (1.15->1) ON ENTER
       if (headingRef.current) {
         gsap.fromTo(
           headingRef.current,
-          { skewY: 6, scaleY: 0.8, opacity: 0 },
+          { skewY: 6, scaleY: 1.15, opacity: 0 },
           {
             skewY: 0,
             scaleY: 1,
             opacity: 1,
-            duration: 0.8,
+            duration: 0.85,
             ease: "back.out(1.7)",
             scrollTrigger: {
               trigger: headingRef.current,
@@ -46,13 +46,13 @@ export const WhatYouGet: React.FC = () => {
         );
       }
 
-      // 2. WORD-BY-WORD REVEAL FOR CAPABILITIES_INTRO + CHIP SCALE POPS
+      // 2. WORD-BY-WORD REVEAL TIED TO SCROLL PROGRESS + CHIP POPS AT POSITION
       if (sentenceRef.current) {
         const split = new SplitText(sentenceRef.current, { type: "words" });
 
         gsap.fromTo(
           split.words,
-          { opacity: 0.15, y: 10 },
+          { opacity: 0.2, y: 8 },
           {
             opacity: 1,
             y: 0,
@@ -61,13 +61,13 @@ export const WhatYouGet: React.FC = () => {
             scrollTrigger: {
               trigger: sentenceRef.current,
               start: "top 80%",
-              end: "bottom 50%",
-              scrub: 0.5,
+              end: "bottom 45%",
+              scrub: 0.6,
             },
           }
         );
 
-        // Chip pops (scale 0 -> 1)
+        // Chips pop scale 0 -> 1 (back.out) at position
         if (chip1Ref.current && chip2Ref.current) {
           gsap.fromTo(
             [chip1Ref.current, chip2Ref.current],
@@ -79,7 +79,7 @@ export const WhatYouGet: React.FC = () => {
               ease: "back.out(2)",
               scrollTrigger: {
                 trigger: sentenceRef.current,
-                start: "top 70%",
+                start: "top 72%",
                 toggleActions: "play none none none",
               },
             }
@@ -87,14 +87,14 @@ export const WhatYouGet: React.FC = () => {
         }
       }
 
-      // 3. CAPABILITY CARDS STAGGER RISE + DIVIDER HAIRLINE LEFT-TO-RIGHT DRAWS
+      // 3. CAPABILITY ROWS STAGGER IN (y:40, 80ms apart) + HAIRLINE DRAWS (left->right)
       cardsRef.current.forEach((card, idx) => {
         const hairline = hairlinesRef.current[idx];
         if (!card) return;
 
         gsap.fromTo(
           card,
-          { y: 50, opacity: 0 },
+          { y: 40, opacity: 0 },
           {
             y: 0,
             opacity: 1,
@@ -139,7 +139,7 @@ export const WhatYouGet: React.FC = () => {
       className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10"
     >
       <div className="max-w-4xl mx-auto">
-        <div ref={headingRef} className="will-change-transform">
+        <div ref={headingRef} className="will-change-transform origin-top">
           <SectionHeading eyebrow="Capabilities" title="What You Get?" />
         </div>
 
