@@ -192,7 +192,7 @@ export const Hero: React.FC = () => {
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="relative min-h-screen h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-4 px-6 md:px-12 select-none z-10 overflow-hidden"
+      className="relative min-h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-6 px-6 md:px-12 select-none z-10 overflow-hidden"
     >
       {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" ── */}
       <motion.div
@@ -233,17 +233,17 @@ export const Hero: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* ── CENTER LAYOUT CONTAINER (Shifted 5cm / 60px Upwards) ── */}
-      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-4 pb-12 -mt-12 sm:-mt-16">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Transparent Cutout PNG, z-10) ── */}
+      {/* ── CENTER LAYOUT CONTAINER (Full size image anchored at section bottom) ── */}
+      <div className="relative w-full max-w-6xl mx-auto flex-1 flex items-end justify-center z-10 pt-8 pb-0">
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Full size cutout, anchored at bottom) ── */}
         <motion.div
           variants={portraitVariants}
-          className="relative w-[300px] sm:w-[380px] md:w-[440px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden"
+          className="relative w-[360px] sm:w-[460px] md:w-[560px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden"
         >
           <img
             src="/photo-cutout.png"
             alt="Rubahan P"
-            className="w-full h-full object-contain object-bottom select-none scale-[1.25] origin-bottom"
+            className="w-full h-full object-contain object-bottom select-none scale-[1.5] origin-bottom"
           />
         </motion.div>
 
@@ -255,7 +255,7 @@ export const Hero: React.FC = () => {
           {/* FLOATING LEFT STATS CARDS */}
           <motion.div
             variants={leftCardVariants}
-            className="absolute left-0 sm:left-4 top-1/4 flex flex-col gap-4 z-20 hidden lg:flex pointer-events-auto"
+            className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex pointer-events-auto"
           >
             {/* Card 1: 5 Flagship Projects */}
             <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
@@ -311,11 +311,11 @@ export const Hero: React.FC = () => {
             </ul>
           </motion.div>
 
-          {/* OVERLAY HEADLINE & ACTION BUTTONS ON TORSO (Shifted 5cm Upwards) ── */}
-          <div className="absolute inset-x-0 bottom-16 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
+          {/* OVERLAY HEADLINE & ACTION BUTTONS ON TORSO ── */}
+          <div className="absolute inset-x-0 bottom-10 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
             <motion.h1
               variants={headlineVariants}
-              className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-5 pointer-events-auto"
+              className="font-heading font-extrabold text-5xl sm:text-7xl md:text-8xl lg:text-9xl tracking-tight text-white leading-[0.9] mb-6 pointer-events-auto"
             >
               <div>Engineering,</div>
               <div>Applied</div>
