@@ -25,6 +25,13 @@ export const Projects: React.FC = () => {
     window.open(githubUrl, "_blank", "noopener,noreferrer");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, githubUrl: string) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleActivateProject(githubUrl);
+    }
+  };
+
   // DESKTOP: PINNED HORIZONTAL GALLERY (300vh pin distance)
   useEffect(() => {
     const section = sectionRef.current;
@@ -32,15 +39,14 @@ export const Projects: React.FC = () => {
     if (!section || !track || reducedMotion || !isDesktop) return;
 
     const ctx = gsap.context(() => {
-      // Calculate total horizontal scroll distance
-      const totalScrollWidth = track.scrollWidth - window.innerWidth + 300;
+      // 1. PIN & HORIZONTAL TRACK TRANSLATION (~300vh)
+      const totalScrollWidth = track.scrollWidth - window.innerWidth + 320;
 
-      // 1. PIN & HORIZONTAL TRACK TRANSLATION
       const pinTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: `+=${totalScrollWidth}`,
+          end: `+=${Math.max(totalScrollWidth, window.innerHeight * 3)}`,
           pin: true,
           pinSpacing: true,
           scrub: 0.8,
@@ -55,11 +61,11 @@ export const Projects: React.FC = () => {
         ease: "none",
       });
 
-      // 2. BACKGROUND THEME LERPING ON PIN (#F6FAFD <-> #0B1F33)
+      // 2. BACKGROUND THEME LERPING (#F6FAFD <-> #0B1F33) - ONLY DARK PASSAGE
       ScrollTrigger.create({
         trigger: section,
-        start: "top 40%",
-        end: `+=${totalScrollWidth + window.innerHeight * 0.5}`,
+        start: "top 50%",
+        end: `+=${Math.max(totalScrollWidth, window.innerHeight * 3) + window.innerHeight * 0.4}`,
         onEnter: () => {
           gsap.to(document.documentElement, {
             "--color-canvas": "#0B1F33",
@@ -102,25 +108,41 @@ export const Projects: React.FC = () => {
         },
       });
 
-      // 3. CARD CENTER CROSS SCALE & PARALLAX EFFECT
+      // 3. CARD CENTER CROSS SCALE (0.9 -> 1.05) & OPACITY (0.6 -> 1)
       cardsRef.current.forEach((card) => {
         if (!card) return;
+
+        // Scale up + full opacity when approaching center
         gsap.fromTo(
           card,
-          { scale: 0.92, rotateY: -3 },
+          { scale: 0.9, opacity: 0.6 },
           {
-            scale: 1.02,
-            rotateY: 0,
+            scale: 1.05,
+            opacity: 1,
             ease: "power1.out",
             scrollTrigger: {
               trigger: card,
               containerAnimation: pinTimeline,
-              start: "left 85%",
+              start: "left 80%",
               end: "center center",
               scrub: true,
             },
           }
         );
+
+        // Scale down + lower opacity after leaving center
+        gsap.to(card, {
+          scale: 0.9,
+          opacity: 0.6,
+          ease: "power1.in",
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: pinTimeline,
+            start: "center center",
+            end: "right 20%",
+            scrub: true,
+          },
+        });
       });
     }, sectionRef);
 
@@ -144,7 +166,7 @@ export const Projects: React.FC = () => {
         isDesktop ? "h-screen py-12 flex flex-col justify-between" : "py-24 px-6"
       }`}
     >
-      {/* Top Header - Fixed/Pinned inside Section */}
+      {/* Top Header - Pinned Top-Left */}
       <div className="w-full max-w-7xl mx-auto px-6 md:pl-72 md:pr-12 pt-4">
         <SectionHeading eyebrow="Selected Work" title="Built to Perform" />
         <p className="text-mist font-mono text-xs md:text-sm mt-3 max-w-xl">
@@ -157,7 +179,7 @@ export const Projects: React.FC = () => {
         <div className="w-full overflow-hidden my-auto py-6">
           <div
             ref={trackRef}
-            className="flex gap-8 pl-72 pr-24 w-max items-center will-change-transform"
+            className="flex gap-8 pl-72 pr-32 w-max items-center will-change-transform"
           >
             {PROJECTS.map((project, idx) => {
               const outcomeInfo = WORK_OUTCOMES.find((o) => o.id === project.id);
@@ -168,7 +190,9 @@ export const Projects: React.FC = () => {
                 <div
                   key={project.id}
                   ref={(el) => { cardsRef.current[idx] = el; }}
+                  tabIndex={0}
                   onClick={() => handleActivateProject(project.github)}
+                  onKeyDown={(e) => handleKeyDown(e, project.github)}
                   onMouseEnter={() => {
                     setHoveredIdx(idx);
                     setCursorLabel("open");
@@ -177,16 +201,17 @@ export const Projects: React.FC = () => {
                     setHoveredIdx(null);
                     setCursorLabel("");
                   }}
-                  className={`w-[480px] lg:w-[540px] h-[400px] p-8 bg-surface rounded-2xl border border-mist/20 shadow-xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform ${
+                  className={`w-[480px] lg:w-[540px] h-[400px] p-8 bg-surface rounded-2xl border border-mist/20 shadow-2xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform focus:outline-none focus:ring-2 focus:ring-sky ${
                     hoveredIdx !== null && hoveredIdx !== idx
                       ? "opacity-40 scale-95"
-                      : "opacity-100 scale-100"
+                      : "opacity-100"
                   }`}
                   style={{
                     borderTop: `4px solid ${project.accent}`,
                   }}
+                  aria-label={`Open ${project.title} on GitHub. Outcome: ${outcome}`}
                 >
-                  {/* Top Bar: Index & Tech Chips */}
+                  {/* Top Bar: Sky Number Chip & Domain */}
                   <div>
                     <div className="flex items-center justify-between gap-4 mb-4">
                       <span className="px-3 py-1 bg-sky/10 text-sky text-xs font-mono font-bold rounded-full border border-sky/20">
@@ -219,7 +244,7 @@ export const Projects: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Bottom Bar: Stack & Action */}
+                  {/* Bottom Bar: Tag Chips & Action */}
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {chips.slice(0, 3).map((chip, i) => (
@@ -243,7 +268,7 @@ export const Projects: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* MOBILE HORIZONTAL SCROLL-SNAP SWIPER (≤768px) */
+        /* MOBILE SCROLL-SNAP SWIPER (≤768px) */
         <div className="w-full overflow-x-auto snap-x snap-mandatory flex gap-5 py-6 mt-6 px-4 no-scrollbar">
           {PROJECTS.map((project) => {
             const outcomeInfo = WORK_OUTCOMES.find((o) => o.id === project.id);
@@ -253,9 +278,12 @@ export const Projects: React.FC = () => {
             return (
               <div
                 key={project.id}
+                tabIndex={0}
                 onClick={() => handleActivateProject(project.github)}
-                className="w-[85vw] max-w-[340px] shrink-0 snap-center p-6 bg-surface rounded-2xl border border-mist/20 shadow-md flex flex-col justify-between min-h-[360px] active:scale-95 transition-transform"
+                onKeyDown={(e) => handleKeyDown(e, project.github)}
+                className="w-[85vw] max-w-[340px] shrink-0 snap-center p-6 bg-surface rounded-2xl border border-mist/20 shadow-md flex flex-col justify-between min-h-[360px] active:scale-95 transition-transform cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky"
                 style={{ borderTop: `4px solid ${project.accent}` }}
+                aria-label={`Open ${project.title} on GitHub. Outcome: ${outcome}`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
