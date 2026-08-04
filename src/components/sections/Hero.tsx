@@ -4,7 +4,6 @@ import { HERO_COPY } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
 import { CountUp } from "@/components/CountUp";
 import { Magnetic } from "@/components/Magnetic";
-import { PlayReelButton } from "@/components/PlayReel";
 import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
 import { Sparkles, ShieldCheck, Target, Hammer, Zap } from "lucide-react";
 
@@ -25,7 +24,7 @@ const containerVariants: Variants = {
   },
 };
 
-// Phase 1: Backdrop Display Text ("RUBAHAN") — Dramatic 1.6s Cinematic Duration
+// Phase 1: Backdrop Display Text ("RUBAHAN") — 1.6s Cinematic Duration
 const backgroundTextVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -73,7 +72,7 @@ const uiContainerVariants: Variants = {
   },
 };
 
-// Floating Left Stats Cards (Spring physics: stiffness 120, damping 12)
+// Floating Left Stats Cards
 const leftCardVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -92,7 +91,7 @@ const leftCardVariants: Variants = {
   },
 };
 
-// Floating Right Traits Glass Card (Spring physics: stiffness 120, damping 12)
+// Floating Right Traits Glass Card
 const rightCardVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -128,7 +127,7 @@ const headlineVariants: Variants = {
   },
 };
 
-// Action Buttons Spring Pop (Stiffness 140, Damping 12)
+// Action Buttons Spring Pop
 const ctaButtonVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -195,7 +194,7 @@ export const Hero: React.FC = () => {
       animate="show"
       className="relative min-h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-8 px-6 md:px-12 select-none z-10 overflow-hidden"
     >
-      {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" (Full Visibility text-[17vw], Icy Blue #38BDF8) ── */}
+      {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" ── */}
       <motion.div
         variants={backgroundTextVariants}
         className="absolute top-4 left-0 w-full text-center font-heading font-extrabold text-[17vw] leading-none text-[#38BDF8] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
@@ -206,7 +205,7 @@ export const Hero: React.FC = () => {
         RUBAHAN
       </motion.div>
 
-      {/* ── PHASE 3: HORIZONTAL TOP NAVIGATION BAR (Hides seamlessly when scrolled past Hero) ── */}
+      {/* ── PHASE 3: HORIZONTAL TOP NAVIGATION BAR ── */}
       <motion.div
         variants={uiItemVariants}
         animate={{ opacity: scrolledPastHero ? 0 : 1, y: scrolledPastHero ? -20 : 0 }}
@@ -236,21 +235,16 @@ export const Hero: React.FC = () => {
 
       {/* ── CENTER LAYOUT CONTAINER ── */}
       <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-12">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Cutout floating over text, z-10) ── */}
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Pure Subject Cutout, ZERO Background Card/Box, NO Play Reel Button) ── */}
         <motion.div
           variants={portraitVariants}
-          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] z-10 will-change-transform flex items-center justify-center overflow-hidden"
+          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] z-10 will-change-transform flex items-center justify-center"
         >
           <img
             src="/photo.jpg"
             alt="Rubahan P"
             className="w-full h-full object-cover select-none mix-blend-multiply scale-[1.5] origin-center"
           />
-
-          {/* Circular Glass Play Reel Button */}
-          <div className="absolute right-4 bottom-6 z-30">
-            <PlayReelButton />
-          </div>
         </motion.div>
 
         {/* ── PHASE 3: INTERFACE CONTAINER (z-20 / z-30) ── */}
@@ -321,16 +315,16 @@ export const Hero: React.FC = () => {
           <div className="absolute inset-x-0 bottom-12 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
             <motion.h1
               variants={headlineVariants}
-              className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)] leading-[0.9] mb-6 pointer-events-auto"
+              className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-6 pointer-events-auto"
             >
               <div>Engineering,</div>
               <div>Applied</div>
-              <div className="font-serif italic text-[#38BDF8] drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+              <div className="font-serif italic text-[#38BDF8]">
                 Differently.
               </div>
             </motion.h1>
 
-            {/* ICY LIGHT BLUE ACTION BUTTONS */}
+            {/* ICY SKY BLUE ACTION BUTTONS */}
             <motion.div
               variants={ctaButtonVariants}
               className="flex items-center justify-center gap-4 pointer-events-auto"
