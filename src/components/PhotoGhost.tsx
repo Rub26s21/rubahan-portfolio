@@ -19,26 +19,26 @@ export const PhotoGhost: React.FC = () => {
     if (!journeySection) return;
 
     const ctx = gsap.context(() => {
-      // Single ScrollTrigger from hero-pin end to Journey end (scrub: 1)
+      // Single ScrollTrigger starting when Journey section comes into view
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: journeySection,
-          start: "top 80%",
+          start: "top 90%",
           end: "bottom 85%",
           scrub: 1,
         },
       });
 
-      // Handoff & Drift sequence: Left (4vw) -> Low-Right (64vw) -> Low-Left (4vw) -> Right (64vw) -> Fade Out after '26
+      // Handoff & Drift sequence: Left (4vw) -> Low-Right (60vw) -> Low-Left (0vw) -> Right (60vw) -> Fade Out
       tl.fromTo(
         ghost,
-        { x: 0, y: 0, opacity: 0 },
-        { x: 0, y: 0, opacity: 0.45, duration: 0.15, ease: "power1.out" }
+        { x: 0, y: 0, opacity: 0, display: "none" },
+        { x: 0, y: 0, opacity: 0.45, display: "block", duration: 0.15, ease: "power1.out" }
       )
         .to(ghost, { x: "60vw", y: "20vh", opacity: 0.45, ease: "none" })
         .to(ghost, { x: "0vw", y: "42vh", opacity: 0.45, ease: "none" })
         .to(ghost, { x: "60vw", y: "60vh", opacity: 0.35, ease: "none" })
-        .to(ghost, { opacity: 0, y: "75vh", ease: "power1.out" });
+        .to(ghost, { opacity: 0, y: "75vh", display: "none", ease: "power1.out" });
     });
 
     return () => ctx.revert();
@@ -49,7 +49,7 @@ export const PhotoGhost: React.FC = () => {
   return (
     <div
       ref={ghostRef}
-      className="fixed left-[4vw] top-[25vh] w-56 h-72 rounded-2xl overflow-hidden pointer-events-none z-[1] opacity-0 border border-[#8FB3C7]/20 will-change-transform shadow-2xl"
+      className="fixed left-[4vw] top-[15vh] w-56 h-72 rounded-2xl overflow-hidden pointer-events-none z-[1] opacity-0 hidden border border-[#8FB3C7]/20 will-change-transform shadow-2xl"
       style={{
         filter: "blur(24px)",
         transform: "scale(0.55)",

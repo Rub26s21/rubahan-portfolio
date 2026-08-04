@@ -36,10 +36,10 @@ export const Hero: React.FC = () => {
     if (reducedMotion || !preloaderFinished) return;
 
     const ctx = gsap.context(() => {
-      // 1. HERO LOAD SEQUENCE (plays once hand-off from preloader completes)
+      // 1. HERO LOAD SEQUENCE: Crystal Sharp Photo Reveal
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // Giant RUBAHAN clips in from the left
+      // Monogram background clips in
       if (monogramRef.current) {
         tl.fromTo(
           monogramRef.current,
@@ -49,24 +49,20 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // Photo Card starts centered, increases size reveal scale 1.35 -> 1.0 + blur clear
+      // Photo Card starts in center, scale 1.15 -> 1.0, 100% crystal sharp
       if (photoCardRef.current && photoImgRef.current) {
         tl.fromTo(
           photoCardRef.current,
-          { scale: 1.35, opacity: 0 },
-          { scale: 1.0, opacity: 1, duration: 1.2, ease: "power4.out" },
+          { scale: 1.15, opacity: 0 },
+          { scale: 1.0, opacity: 1, duration: 1.1, ease: "back.out(1.4)" },
           0
         );
 
-        tl.fromTo(
-          photoImgRef.current,
-          { filter: "blur(24px)" },
-          { filter: "blur(0px)", duration: 1.2 },
-          0.1
-        );
+        // Ensure zero blur on main photo
+        gsap.set(photoImgRef.current, { filter: "none" });
       }
 
-      // H1 lines unmask top-to-bottom staggered
+      // H1 lines unmask
       if (h1Ref.current) {
         const split = new SplitText(h1Ref.current, {
           type: "lines,words",
@@ -86,17 +82,17 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // Trait pills & action content fade in last
+      // Trait pills & action content
       if (traitsRef.current && contentRef.current) {
         tl.fromTo(
           [traitsRef.current, contentRef.current],
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-          0.8
+          0.7
         );
       }
 
-      // 2. HERO PIN EXIT (Moves photo to topmost left corner while scrolling)
+      // 2. HERO PIN EXIT: Scrub-moves photo to top-left corner
       const section = sectionRef.current;
       if (!section || !isDesktop) return;
 
@@ -146,8 +142,8 @@ export const Hero: React.FC = () => {
         exitTl.to(contentRef.current, { y: -60, opacity: 0, ease: "none" }, 0);
       }
 
-      // PHOTO CARD MOVES TO THE TOPMOST CORNER OF THE LEFT SIDE (-36vw, -36vh, scale 0.55) AND STAYS ANCHORED
-      if (photoCardRef.current && photoImgRef.current) {
+      // PHOTO CARD MOVES SMOOTHLY TO THE TOPMOST CORNER OF THE LEFT SIDE
+      if (photoCardRef.current) {
         exitTl.to(
           photoCardRef.current,
           {
@@ -155,15 +151,6 @@ export const Hero: React.FC = () => {
             y: "-36vh",
             scale: 0.55,
             opacity: 0.45,
-            ease: "power1.inOut",
-          },
-          0
-        );
-
-        exitTl.to(
-          photoImgRef.current,
-          {
-            filter: "blur(24px)",
             ease: "power1.inOut",
           },
           0
@@ -220,7 +207,7 @@ export const Hero: React.FC = () => {
 
       {/* Center Layout Container */}
       <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative z-10 mt-6">
-        {/* Central Photo Card (Starts in center, increases size on load, moves to top-left corner on scroll) */}
+        {/* Central Photo Card (Crystal Sharp, Centered on Load, Moves to Top-Left Corner on Scroll) */}
         <div
           ref={photoCardRef}
           className="relative w-52 h-64 sm:w-60 sm:h-72 md:w-72 md:h-[360px] mb-6 select-none will-change-transform z-10"
