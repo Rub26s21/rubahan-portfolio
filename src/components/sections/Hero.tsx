@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useAppStore } from "@/lib/store";
 import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { HERO_COPY } from "@/lib/site-copy";
 import { PROFILE, SKILL_GROUPS } from "@/lib/data";
 import { CountUp } from "@/components/CountUp";
@@ -15,6 +16,8 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 export const Hero: React.FC = () => {
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const lenis = useSmoothScroll();
+  const isDesktop = useMediaQuery("(min-width: 769px)");
+
   const sectionRef = useRef<HTMLDivElement>(null);
   const monogramRef = useRef<HTMLDivElement>(null);
   const photoCardRef = useRef<HTMLDivElement>(null);
@@ -30,10 +33,10 @@ export const Hero: React.FC = () => {
     if (reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // 1. MASTER ENTRANCE TIMELINE (~1.6s)
+      // 1. LOAD SEQUENCE (one GSAP timeline, ~1.6s, once)
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // Monogram clip-in from left
+      // Giant RUBAHAN clips in from the left
       if (monogramRef.current) {
         tl.fromTo(
           monogramRef.current,
@@ -43,7 +46,7 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // Photo scale 1.15 + blur(20px) -> sharpens & settles
+      // Photo starts scale 1.15 + blur(20px), settles sharp at scale 1
       if (photoImgRef.current) {
         tl.fromTo(
           photoImgRef.current,
@@ -53,7 +56,7 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // H1 line unmask
+      // H1 lines unmask top-to-bottom staggered ("Differently." last)
       if (h1Ref.current) {
         const split = new SplitText(h1Ref.current, {
           type: "lines,words",
@@ -61,19 +64,19 @@ export const Hero: React.FC = () => {
         });
 
         tl.fromTo(
-          split.words,
+          split.lines,
           { yPercent: 110 },
           {
             yPercent: 0,
-            duration: 0.9,
+            duration: 0.85,
             ease: "power4.out",
-            stagger: 0.035,
+            stagger: 0.1,
           },
           0.2
         );
       }
 
-      // Traits & Action content fade in last
+      // Trait pills & action content fade in last
       if (traitsRef.current && contentRef.current) {
         tl.fromTo(
           [traitsRef.current, contentRef.current],
@@ -83,9 +86,9 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // 2. PINNED HERO SCRUB EXIT (150vh)
+      // 2. HERO EXIT (pin hero for 150vh, scrub 0.8) — DESKTOP ONLY
       const section = sectionRef.current;
-      if (!section) return;
+      if (!section || !isDesktop) return;
 
       const exitTl = gsap.timeline({
         scrollTrigger: {
@@ -105,7 +108,7 @@ export const Hero: React.FC = () => {
       if (monogramRef.current) {
         exitTl.to(
           monogramRef.current,
-          { xPercent: -30, yPercent: -40, opacity: 0.2, ease: "none" },
+          { xPercent: -35, yPercent: -50, opacity: 0.15, ease: "none" },
           0
         );
       }
@@ -114,25 +117,34 @@ export const Hero: React.FC = () => {
       if (h1Ref.current) {
         exitTl.to(
           h1Ref.current,
-          { x: 120, y: -80, opacity: 0.1, ease: "none" },
+          { x: 140, y: -100, opacity: 0.08, ease: "none" },
+          0
+        );
+      }
+
+      // Trait pills scatter slightly left
+      if (traitsRef.current) {
+        exitTl.to(
+          traitsRef.current,
+          { x: -60, opacity: 0, ease: "none" },
           0
         );
       }
 
       // Intro copy & buttons fade away
       if (contentRef.current) {
-        exitTl.to(contentRef.current, { y: -50, opacity: 0, ease: "none" }, 0);
+        exitTl.to(contentRef.current, { y: -60, opacity: 0, ease: "none" }, 0);
       }
 
-      // Photo card SCALES DOWN, TRANSLATES LEFT, and BLURS (0 -> 24px, opacity 0.45)
-      // Becoming the blurred ghost behind Journey
+      // PHOTO CARD scales to ~0.55, blurs to 24px, opacity 0.45, translates to the LEFT viewport edge
+      // Persists as blurred ghost behind Journey
       if (photoCardRef.current && photoImgRef.current) {
         exitTl.to(
           photoCardRef.current,
           {
-            x: -220,
-            y: 180,
-            scale: 0.7,
+            x: -260,
+            y: 220,
+            scale: 0.55,
             opacity: 0.45,
             ease: "power1.inOut",
           },
@@ -151,7 +163,7 @@ export const Hero: React.FC = () => {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, isDesktop]);
 
   const handleScrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -167,7 +179,9 @@ export const Hero: React.FC = () => {
     <section
       id="hero"
       ref={sectionRef}
-      className="relative h-screen w-full bg-canvas overflow-hidden flex flex-col justify-between items-center py-16 px-6 md:pl-72 md:pr-12 select-none z-10"
+      className={`relative h-screen w-full bg-canvas flex flex-col justify-between items-center py-16 px-6 md:pl-72 md:pr-12 select-none z-10 ${
+        isDesktop ? "overflow-visible" : "overflow-hidden"
+      }`}
     >
       {/* Giant Background Monogram Type */}
       <div
@@ -200,7 +214,7 @@ export const Hero: React.FC = () => {
         {/* Central Photo Card */}
         <div
           ref={photoCardRef}
-          className="relative w-52 h-64 sm:w-60 sm:h-72 md:w-72 md:h-[360px] mb-6 select-none will-change-transform"
+          className="relative w-52 h-64 sm:w-60 sm:h-72 md:w-72 md:h-[360px] mb-6 select-none will-change-transform z-10"
         >
           <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-4 border-surface bg-surface">
             <img
