@@ -232,15 +232,15 @@ export const Hero: React.FC = () => {
 
       {/* ── CENTER LAYOUT CONTAINER (Profile picture anchored flush to absolute bottom) ── */}
       <div className="relative w-full max-w-6xl mx-auto flex-1 flex items-end justify-center z-10 pt-12 pb-0">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Anchored flush to bottom-0) ── */}
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Chest-Up Framing, Anchored flush to bottom-0) ── */}
         <motion.div
           variants={portraitVariants}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[340px] sm:w-[440px] md:w-[500px] lg:w-[560px] h-[75vh] max-h-[720px] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden pb-0 mb-0"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[380px] sm:w-[500px] md:w-[600px] lg:w-[680px] h-[85vh] max-h-[820px] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden pb-0 mb-0"
         >
           <img
             src="/photo-cutout.png"
             alt="Rubahan P"
-            className="w-full h-full object-contain object-bottom select-none scale-[1.3] origin-bottom"
+            className="w-full h-full object-contain object-top select-none scale-[2.3] origin-top translate-y-[12%]"
           />
         </motion.div>
 
