@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { motion, type Variants } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useTransform, type Variants } from "framer-motion";
 import { HERO_COPY } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
 import { CountUp } from "@/components/CountUp";
@@ -163,6 +163,37 @@ const uiItemVariants: Variants = {
 export const Hero: React.FC = () => {
   const lenis = useSmoothScroll();
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  // Scroll Progress Tracking across dedicated 300vh scroll track
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start start", "end end"],
+  });
+
+  // SCROLL-DRIVEN TRANSFORMS (GPU Accelerated)
+  // 1. Central Content (Portrait + Headline Overlay) Shrink & Fade Out (0.0 -> 0.7)
+  const heroContentScale = useTransform(scrollYProgress, [0, 0.65], [1, 0.2]);
+  const heroContentOpacity = useTransform(scrollYProgress, [0, 0.5, 0.7], [1, 0.6, 0]);
+  const heroContentY = useTransform(scrollYProgress, [0, 0.7], [0, -120]);
+
+  // 2. Floating Cards Outward Slide & Fade Out (0.0 -> 0.4)
+  const leftCardX = useTransform(scrollYProgress, [0, 0.35], [0, -160]);
+  const leftCardOpacity = useTransform(scrollYProgress, [0, 0.35], [1, 0]);
+
+  const rightCardX = useTransform(scrollYProgress, [0, 0.35], [0, 160]);
+  const rightCardOpacity = useTransform(scrollYProgress, [0, 0.35], [1, 0]);
+
+  // 3. Backdrop Display Text ("RUBAHAN") scale-up & fade out
+  const bgTextScale = useTransform(scrollYProgress, [0, 0.6], [1, 1.25]);
+  const bgTextOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
+
+  // 4. Navigation Morph: Top Horizontal Bar -> Fixed Left Vertical Sidebar (0.35 -> 0.65)
+  const topNavOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
+  const topNavY = useTransform(scrollYProgress, [0, 0.25], [0, -25]);
+
+  const sidebarOpacity = useTransform(scrollYProgress, [0.35, 0.65], [0, 1]);
+  const sidebarX = useTransform(scrollYProgress, [0.35, 0.65], [-50, 0]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -185,187 +216,215 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <motion.section
-      id="hero"
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="relative min-h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-6 px-6 md:px-12 select-none z-10 overflow-hidden"
-    >
-      {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" ── */}
-      <motion.div
-        variants={backgroundTextVariants}
-        className="absolute top-6 left-0 w-full text-center font-heading font-extrabold text-[16vw] leading-none text-[#38BDF8] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
-        style={{
-          textShadow: "0 10px 40px rgba(56,189,248,0.25)",
-        }}
+    <div ref={trackRef} className="relative h-[300vh] w-full bg-[#E1DDD3]">
+      {/* ── STICKY SCROLL CONTAINER (Pins hero content during scroll sequence) ── */}
+      <motion.section
+        id="hero"
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="sticky top-0 h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-6 px-6 md:px-12 select-none z-10 overflow-hidden"
       >
-        RUBAHAN
-      </motion.div>
-
-      {/* ── PHASE 3: HORIZONTAL TOP NAVIGATION BAR ── */}
-      <motion.div
-        variants={uiItemVariants}
-        animate={{ opacity: scrolledPastHero ? 0 : 1, y: scrolledPastHero ? -20 : 0 }}
-        transition={{ duration: 0.3 }}
-        className={`w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-2 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33] ${
-          scrolledPastHero ? "pointer-events-none" : "pointer-events-auto"
-        }`}
-      >
-        <div className="flex gap-6 items-center">
-          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">HOME</button>
-          <span>|</span>
-          <button onClick={() => handleScrollTo("about")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">ABOUT ME</button>
-          <span>|</span>
-          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">PROJECTS</button>
-        </div>
-
-        <div className="flex gap-6 items-center">
-          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">WHAT YOU GET</button>
-          <span>|</span>
-          <button onClick={() => handleScrollTo("services")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">SERVICES</button>
-          <span>|</span>
-          <button onClick={() => handleScrollTo("process")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">PROCESS</button>
-          <span>|</span>
-          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">FAQ</button>
-        </div>
-      </motion.div>
-
-      {/* ── CENTER LAYOUT CONTAINER (Profile picture touches bottom edge) ── */}
-      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-12 pb-0">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Profile pic touches bottom edge of section) ── */}
+        {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" ── */}
         <motion.div
-          variants={portraitVariants}
-          className="relative w-[320px] sm:w-[400px] md:w-[460px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden pb-0 mb-0"
+          variants={backgroundTextVariants}
+          style={{
+            scale: bgTextScale,
+            opacity: bgTextOpacity,
+            textShadow: "0 10px 40px rgba(56,189,248,0.25)",
+          }}
+          className="absolute top-6 left-0 w-full text-center font-heading font-extrabold text-[16vw] leading-none text-[#38BDF8] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
         >
-          <img
-            src="/photo-cutout.png"
-            alt="Rubahan P"
-            className="w-full h-full object-contain object-bottom select-none scale-[1.25] origin-bottom"
-          />
+          RUBAHAN
         </motion.div>
 
-        {/* ── PHASE 3: INTERFACE CONTAINER (z-20 / z-30) ── */}
+        {/* ── PHASE 3: HORIZONTAL TOP NAVIGATION BAR (Fades out on scroll) ── */}
         <motion.div
-          variants={uiContainerVariants}
-          className="absolute inset-0 pointer-events-none flex items-center justify-center z-20"
+          variants={uiItemVariants}
+          style={{ opacity: topNavOpacity, y: topNavY }}
+          className="w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-2 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33] pointer-events-auto"
         >
-          {/* FLOATING LEFT STATS CARDS */}
-          <motion.div
-            variants={leftCardVariants}
-            className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex pointer-events-auto"
-          >
-            {/* Card 1: 5 Flagship Projects */}
-            <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
-              <div className="w-12 h-12 rounded-xl bg-[#38BDF8] flex items-center justify-center text-[#0B1F33] font-bold text-xl shadow-md">
-                <Sparkles className="w-6 h-6 fill-current text-[#0B1F33]" />
-              </div>
-              <div className="flex flex-col font-mono">
-                <div className="font-heading font-bold text-lg text-[#0B1F33] leading-none">
-                  <CountUp end={5} />+
-                </div>
-                <span className="text-[10px] text-[#0B1F33]/70 font-semibold uppercase">
-                  Projects Shipped
-                </span>
-              </div>
-            </div>
+          <div className="flex gap-6 items-center">
+            <button onClick={() => handleScrollTo("hero")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">HOME</button>
+            <span>|</span>
+            <button onClick={() => handleScrollTo("about")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">ABOUT ME</button>
+            <span>|</span>
+            <button onClick={() => handleScrollTo("projects")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">PROJECTS</button>
+          </div>
 
-            {/* Card 2: 3+ Years of Experience */}
-            <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-1 w-52">
-              <div className="font-heading font-bold text-3xl text-[#38BDF8] drop-shadow-sm leading-none">
-                <CountUp end={3} />+
-              </div>
-              <span className="font-mono text-[10px] text-[#0B1F33]/80 font-bold uppercase tracking-wider">
-                Years of Experience
-              </span>
-            </div>
-          </motion.div>
-
-          {/* FLOATING RIGHT TRAITS GLASS LIST CARD */}
-          <motion.div
-            variants={rightCardVariants}
-            className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 pointer-events-auto"
-          >
-            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0B1F33] border-b border-black/10 pb-2">
-              <Zap className="w-4 h-4 text-[#38BDF8] fill-current" />
-              <span>TRAITS</span>
-            </div>
-            <ul className="flex flex-col gap-2 font-mono text-xs font-bold text-[#0B1F33]">
-              <li className="flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" /> Creative
-              </li>
-              <li className="flex items-center gap-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#38BDF8]" /> Reliable
-              </li>
-              <li className="flex items-center gap-2">
-                <Target className="w-3.5 h-3.5 text-[#38BDF8]" /> Strategist
-              </li>
-              <li className="flex items-center gap-2">
-                <Hammer className="w-3.5 h-3.5 text-[#38BDF8]" /> Builder
-              </li>
-              <li className="flex items-center gap-2">
-                <Zap className="w-3.5 h-3.5 text-[#38BDF8]" /> Efficient
-              </li>
-            </ul>
-          </motion.div>
-
-          {/* OVERLAY HEADLINE & ACTION BUTTONS ON TORSO */}
-          <div className="absolute inset-x-0 bottom-24 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
-            <motion.h1
-              variants={headlineVariants}
-              className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-5 pointer-events-auto"
-            >
-              <div>Engineering,</div>
-              <div>Applied</div>
-              <div className="font-serif italic text-[#38BDF8]">
-                Differently.
-              </div>
-            </motion.h1>
-
-            {/* ICY SKY BLUE ACTION BUTTONS */}
-            <motion.div
-              variants={ctaButtonVariants}
-              className="flex items-center justify-center gap-4 pointer-events-auto"
-            >
-              <Magnetic>
-                <a
-                  href={`mailto:${PROFILE.email}`}
-                  className="px-8 py-3.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
-                >
-                  Let's Talk
-                </a>
-              </Magnetic>
-
-              <Magnetic>
-                <button
-                  onClick={() => handleScrollTo("about")}
-                  className="px-8 py-3.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
-                >
-                  About Me
-                </button>
-              </Magnetic>
-            </motion.div>
+          <div className="flex gap-6 items-center">
+            <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">WHAT YOU GET</button>
+            <span>|</span>
+            <button onClick={() => handleScrollTo("services")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">SERVICES</button>
+            <span>|</span>
+            <button onClick={() => handleScrollTo("process")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">PROCESS</button>
+            <span>|</span>
+            <button onClick={() => handleScrollTo("faq")} className="hover:text-[#38BDF8] transition-colors cursor-pointer">FAQ</button>
           </div>
         </motion.div>
-      </div>
 
-      {/* ── PHASE 3: EDITORIAL COPY (Floating cleanly at bottom of landing page section) ── */}
-      <motion.div
-        variants={uiItemVariants}
-        className="w-full max-w-7xl mx-auto flex justify-between items-end z-30 -mt-16 pb-4 font-mono text-xs text-[#0B1F33]/90 leading-relaxed pointer-events-auto"
-      >
-        <div className="max-w-xs font-bold bg-[#E1DDD3]/80 backdrop-blur-xs px-2 py-1 rounded-md">
-          <p className="text-[#0B1F33] font-heading text-sm font-bold">
-            {HERO_COPY.eyebrow}
-          </p>
-        </div>
+        {/* ── STICKY LEFT-ALIGNED VERTICAL SIDEBAR (MORPHS FROM TOP NAV ON SCROLL) ── */}
+        <motion.div
+          style={{ opacity: sidebarOpacity, x: sidebarX }}
+          className="fixed left-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 p-3.5 rounded-2xl bg-[#0B1F33]/90 backdrop-blur-xl border border-white/15 shadow-2xl font-mono text-xs font-bold tracking-wider text-white"
+        >
+          <div className="text-[10px] text-[#38BDF8] font-bold tracking-widest uppercase pb-1 border-b border-white/10 px-2">
+            NAV
+          </div>
+          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">HOME</button>
+          <button onClick={() => handleScrollTo("about")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">ABOUT ME</button>
+          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">PROJECTS</button>
+          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">WHAT YOU GET</button>
+          <button onClick={() => handleScrollTo("services")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">SERVICES</button>
+          <button onClick={() => handleScrollTo("process")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">PROCESS</button>
+          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">FAQ</button>
+        </motion.div>
 
-        <div className="max-w-xs text-right hidden sm:block bg-[#E1DDD3]/80 backdrop-blur-xs px-2 py-1 rounded-md">
-          <p className="text-[11px] text-[#0B1F33]/90 font-medium">
-            {HERO_COPY.intro}
-          </p>
-        </div>
-      </motion.div>
-    </motion.section>
+        {/* ── CENTER COLLAPSING LAYOUT CONTAINER ── */}
+        <motion.div
+          style={{
+            scale: heroContentScale,
+            opacity: heroContentOpacity,
+            y: heroContentY,
+          }}
+          className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-12 pb-0 will-change-transform"
+        >
+          {/* ── PHASE 2: SUBJECT HERO PORTRAIT ── */}
+          <motion.div
+            variants={portraitVariants}
+            className="relative w-[320px] sm:w-[400px] md:w-[460px] aspect-[4/5] z-10 will-change-transform flex items-end justify-center pointer-events-none select-none overflow-hidden pb-0 mb-0"
+          >
+            <img
+              src="/photo-cutout.png"
+              alt="Rubahan P"
+              className="w-full h-full object-contain object-bottom select-none scale-[1.25] origin-bottom"
+            />
+          </motion.div>
+
+          {/* ── PHASE 3: INTERFACE CONTAINER ── */}
+          <motion.div
+            variants={uiContainerVariants}
+            className="absolute inset-0 pointer-events-none flex items-center justify-center z-20"
+          >
+            {/* FLOATING LEFT STATS CARDS */}
+            <motion.div
+              variants={leftCardVariants}
+              style={{ x: leftCardX, opacity: leftCardOpacity }}
+              className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex pointer-events-auto"
+            >
+              {/* Card 1: 5 Flagship Projects */}
+              <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
+                <div className="w-12 h-12 rounded-xl bg-[#38BDF8] flex items-center justify-center text-[#0B1F33] font-bold text-xl shadow-md">
+                  <Sparkles className="w-6 h-6 fill-current text-[#0B1F33]" />
+                </div>
+                <div className="flex flex-col font-mono">
+                  <div className="font-heading font-bold text-lg text-[#0B1F33] leading-none">
+                    <CountUp end={5} />+
+                  </div>
+                  <span className="text-[10px] text-[#0B1F33]/70 font-semibold uppercase">
+                    Projects Shipped
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2: 3+ Years of Experience */}
+              <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-1 w-52">
+                <div className="font-heading font-bold text-3xl text-[#38BDF8] drop-shadow-sm leading-none">
+                  <CountUp end={3} />+
+                </div>
+                <span className="font-mono text-[10px] text-[#0B1F33]/80 font-bold uppercase tracking-wider">
+                  Years of Experience
+                </span>
+              </div>
+            </motion.div>
+
+            {/* FLOATING RIGHT TRAITS GLASS LIST CARD */}
+            <motion.div
+              variants={rightCardVariants}
+              style={{ x: rightCardX, opacity: rightCardOpacity }}
+              className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 pointer-events-auto"
+            >
+              <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0B1F33] border-b border-black/10 pb-2">
+                <Zap className="w-4 h-4 text-[#38BDF8] fill-current" />
+                <span>TRAITS</span>
+              </div>
+              <ul className="flex flex-col gap-2 font-mono text-xs font-bold text-[#0B1F33]">
+                <li className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" /> Creative
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#38BDF8]" /> Reliable
+                </li>
+                <li className="flex items-center gap-2">
+                  <Target className="w-3.5 h-3.5 text-[#38BDF8]" /> Strategist
+                </li>
+                <li className="flex items-center gap-2">
+                  <Hammer className="w-3.5 h-3.5 text-[#38BDF8]" /> Builder
+                </li>
+                <li className="flex items-center gap-2">
+                  <Zap className="w-3.5 h-3.5 text-[#38BDF8]" /> Efficient
+                </li>
+              </ul>
+            </motion.div>
+
+            {/* OVERLAY HEADLINE & ACTION BUTTONS */}
+            <div className="absolute inset-x-0 bottom-24 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
+              <motion.h1
+                variants={headlineVariants}
+                className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white leading-[0.9] mb-5 pointer-events-auto"
+              >
+                <div>Engineering,</div>
+                <div>Applied</div>
+                <div className="font-serif italic text-[#38BDF8]">
+                  Differently.
+                </div>
+              </motion.h1>
+
+              {/* ICY SKY BLUE ACTION BUTTONS */}
+              <motion.div
+                variants={ctaButtonVariants}
+                className="flex items-center justify-center gap-4 pointer-events-auto"
+              >
+                <Magnetic>
+                  <a
+                    href={`mailto:${PROFILE.email}`}
+                    className="px-8 py-3.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
+                  >
+                    Let's Talk
+                  </a>
+                </Magnetic>
+
+                <Magnetic>
+                  <button
+                    onClick={() => handleScrollTo("about")}
+                    className="px-8 py-3.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
+                  >
+                    About Me
+                  </button>
+                </Magnetic>
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* ── PHASE 3: EDITORIAL COPY (Floating cleanly at bottom of section) ── */}
+        <motion.div
+          variants={uiItemVariants}
+          className="w-full max-w-7xl mx-auto flex justify-between items-end z-30 -mt-16 pb-4 font-mono text-xs text-[#0B1F33]/90 leading-relaxed pointer-events-auto"
+        >
+          <div className="max-w-xs font-bold bg-[#E1DDD3]/80 backdrop-blur-xs px-2 py-1 rounded-md">
+            <p className="text-[#0B1F33] font-heading text-sm font-bold">
+              {HERO_COPY.eyebrow}
+            </p>
+          </div>
+
+          <div className="max-w-xs text-right hidden sm:block bg-[#E1DDD3]/80 backdrop-blur-xs px-2 py-1 rounded-md">
+            <p className="text-[11px] text-[#0B1F33]/90 font-medium">
+              {HERO_COPY.intro}
+            </p>
+          </div>
+        </motion.div>
+      </motion.section>
+    </div>
   );
 };
