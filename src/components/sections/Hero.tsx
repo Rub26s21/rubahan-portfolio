@@ -35,25 +35,25 @@ export const Hero: React.FC = () => {
     if (reducedMotion || !preloaderFinished) return;
 
     const ctx = gsap.context(() => {
-      // 1. Entrance Animation Sequence (Plays smoothly on load handoff)
+      // 1. Entrance Animation Sequence (Slightly Zoomed Photo Card Reveal)
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
-      // Monogram type clip reveal
+      // Monogram type reveal
       if (monogramRef.current) {
         tl.fromTo(
           monogramRef.current,
-          { opacity: 0, scale: 0.9 },
+          { opacity: 0, scale: 0.95 },
           { opacity: 0.85, scale: 1.0, duration: 1.0 },
           0
         );
       }
 
-      // Photo Card 3D Spring Zoom Reveal in Center (100% Crystal Sharp)
+      // Photo Card Entrance: Slightly Zoomed (scale: 1.08), 100% opacity ALWAYS
       if (photoCardRef.current) {
         tl.fromTo(
           photoCardRef.current,
           { scale: 1.25, opacity: 0, y: 30 },
-          { scale: 1.0, opacity: 1, y: 0, duration: 1.1, ease: "back.out(1.5)" },
+          { scale: 1.08, opacity: 1, y: 0, duration: 1.1, ease: "back.out(1.5)" },
           0.1
         );
       }
@@ -89,33 +89,29 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // 2. Scroll Parallax & Corner Motion (Desktop Only)
+      // 2. Scroll Parallax: Photo Card simply goes UP on scroll (NEVER FADES OR VANISHES)
       const section = sectionRef.current;
       if (!section || !isDesktop) return;
 
       gsap.to(photoCardRef.current, {
-        x: "-30vw",
-        y: "-20vh",
-        scale: 0.6,
-        opacity: 0.6,
+        y: "-140px",
         ease: "none",
         scrollTrigger: {
           trigger: section,
           start: "top top",
           end: "bottom top",
-          scrub: 0.6,
+          scrub: 0.5,
         },
       });
 
       gsap.to(monogramRef.current, {
-        y: "-100px",
-        opacity: 0.1,
+        y: "-80px",
         ease: "none",
         scrollTrigger: {
           trigger: section,
           start: "top top",
           end: "bottom top",
-          scrub: 0.6,
+          scrub: 0.5,
         },
       });
     }, sectionRef);
@@ -167,10 +163,10 @@ export const Hero: React.FC = () => {
 
       {/* Hero Center Layout Container */}
       <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative z-10 my-auto">
-        {/* Central 3D Photo Card */}
-        <div ref={photoCardRef} className="relative mb-8 select-none z-10">
+        {/* Central 3D Photo Card (Slightly Zoomed, 100% Opacity Always, Moves Straight Up on Scroll) */}
+        <div ref={photoCardRef} className="relative mb-8 select-none z-10 opacity-100">
           <Card3D intensity={18}>
-            <div className="w-56 h-72 sm:w-64 sm:h-80 md:w-72 md:h-[360px] rounded-3xl overflow-hidden shadow-2xl border-4 border-surface bg-surface relative">
+            <div className="w-56 h-72 sm:w-64 sm:h-80 md:w-72 md:h-[360px] rounded-3xl overflow-hidden shadow-2xl border-4 border-surface bg-surface relative transform scale-[1.08]">
               <img
                 src="/photo.jpg"
                 alt="Rubahan P"
