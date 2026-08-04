@@ -162,8 +162,8 @@ const uiItemVariants: Variants = {
 
 export const Hero: React.FC = () => {
   const lenis = useSmoothScroll();
-  const [scrolledPastHero, setScrolledPastHero] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState("hero");
 
   // Scroll Progress Tracking across dedicated 300vh scroll track
   const { scrollYProgress } = useScroll({
@@ -195,10 +195,23 @@ export const Hero: React.FC = () => {
   const sidebarOpacity = useTransform(scrollYProgress, [0.35, 0.65], [0, 1]);
   const sidebarX = useTransform(scrollYProgress, [0.35, 0.65], [-50, 0]);
 
+  // Scroll-Spy Active Section Detection
   useEffect(() => {
     const handleScroll = () => {
-      const threshold = window.innerHeight * 0.7;
-      setScrolledPastHero(window.scrollY > threshold);
+      const sections = ["hero", "about", "projects", "what-you-get", "services", "process", "faq"];
+      const scrollPos = window.scrollY + window.innerHeight * 0.35;
+
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const top = el.offsetTop;
+          const height = el.offsetHeight;
+          if (scrollPos >= top && scrollPos < top + height) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -263,21 +276,83 @@ export const Hero: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* ── STICKY LEFT-ALIGNED VERTICAL SIDEBAR (MORPHS FROM TOP NAV ON SCROLL) ── */}
+        {/* ── STICKY LEFT-ALIGNED VERTICAL SIDEBAR (MORPHS FROM TOP NAV & STATS ON SCROLL) ── */}
         <motion.div
           style={{ opacity: sidebarOpacity, x: sidebarX }}
-          className="fixed left-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col gap-3 p-3.5 rounded-2xl bg-[#0B1F33]/90 backdrop-blur-xl border border-white/15 shadow-2xl font-mono text-xs font-bold tracking-wider text-white"
+          className="fixed left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 hidden md:flex flex-col justify-between w-60 h-[82vh] max-h-[600px] p-4 rounded-3xl bg-[#0B1F33]/95 backdrop-blur-2xl border border-white/15 shadow-2xl font-mono text-xs text-white pointer-events-auto"
         >
-          <div className="text-[10px] text-[#38BDF8] font-bold tracking-widest uppercase pb-1 border-b border-white/10 px-2">
-            NAV
+          {/* Top Branding & Docked Mini Stat Cards */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <span className="font-heading font-extrabold text-sm tracking-wider text-[#38BDF8]">
+                RUBAHAN<span className="text-white text-[10px] ml-0.5">®</span>
+              </span>
+              <span className="text-[9px] text-white/50 font-bold uppercase tracking-widest">
+                PORTFOLIO
+              </span>
+            </div>
+
+            {/* Docked Mini Stat Cards (Matching TRANSITION-.mp4 sidebar header) */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="p-2 rounded-xl bg-white/10 border border-white/10 flex flex-col items-center justify-center text-center">
+                <span className="font-heading font-bold text-sm text-[#38BDF8]">5+</span>
+                <span className="text-[9px] text-white/70 font-semibold uppercase tracking-tight">Projects</span>
+              </div>
+              <div className="p-2 rounded-xl bg-white/10 border border-white/10 flex flex-col items-center justify-center text-center">
+                <span className="font-heading font-bold text-sm text-[#38BDF8]">3+</span>
+                <span className="text-[9px] text-white/70 font-semibold uppercase tracking-tight">Years Exp</span>
+              </div>
+            </div>
           </div>
-          <button onClick={() => handleScrollTo("hero")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">HOME</button>
-          <button onClick={() => handleScrollTo("about")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">ABOUT ME</button>
-          <button onClick={() => handleScrollTo("projects")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">PROJECTS</button>
-          <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">WHAT YOU GET</button>
-          <button onClick={() => handleScrollTo("services")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">SERVICES</button>
-          <button onClick={() => handleScrollTo("process")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">PROCESS</button>
-          <button onClick={() => handleScrollTo("faq")} className="hover:text-[#38BDF8] transition-colors cursor-pointer px-2 py-1 text-left rounded hover:bg-white/10">FAQ</button>
+
+          {/* Vertical Scroll-Spy Navigation Links with Glowing Active Dot */}
+          <div className="flex flex-col gap-1 py-2">
+            {[
+              { id: "hero", label: "HOME" },
+              { id: "about", label: "ABOUT ME" },
+              { id: "projects", label: "PROJECTS" },
+              { id: "what-you-get", label: "WHAT YOU GET" },
+              { id: "services", label: "SERVICES" },
+              { id: "process", label: "PROCESS" },
+              { id: "faq", label: "FAQ" },
+            ].map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleScrollTo(item.id)}
+                  className={`flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-[11px] font-bold tracking-wider transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? "bg-[#38BDF8]/20 text-[#38BDF8] border border-[#38BDF8]/30 shadow-sm"
+                      : "text-white/70 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      isActive ? "bg-[#38BDF8] shadow-[0_0_8px_#38BDF8]" : "bg-white/20"
+                    }`}
+                  />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Pinned Bottom Email & CTA Button (Matching TRANSITION-.mp4 sidebar footer) */}
+          <div className="flex flex-col gap-2 pt-2.5 border-t border-white/10">
+            <a
+              href={`mailto:${PROFILE.email}`}
+              className="text-[10px] text-white/60 hover:text-[#38BDF8] transition-colors truncate px-1 text-center font-bold"
+            >
+              {PROFILE.email}
+            </a>
+            <a
+              href={`mailto:${PROFILE.email}`}
+              className="w-full py-2.5 bg-[#38BDF8] text-[#0B1F33] hover:bg-[#0EA5E9] hover:text-white rounded-xl text-[11px] font-bold font-mono tracking-wider uppercase transition-all duration-300 text-center shadow-xl cursor-pointer"
+            >
+              Let's Talk
+            </a>
+          </div>
         </motion.div>
 
         {/* ── CENTER COLLAPSING LAYOUT CONTAINER ── */}

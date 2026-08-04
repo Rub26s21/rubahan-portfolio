@@ -41,13 +41,15 @@ export default function App() {
       <Nav />
       <main className="relative min-h-screen bg-canvas text-ink">
         <HeroWrapper />
-        <Journey />
-        <WorkGallery />
-        <WhatYouGet />
-        <Services />
-        <Process />
-        <Recognition />
-        <Faq />
+        <div className="w-full md:pl-64 lg:pl-72 transition-all duration-500">
+          <Journey />
+          <WorkGallery />
+          <WhatYouGet />
+          <Services />
+          <Process />
+          <Recognition />
+          <Faq />
+        </div>
       </main>
       <Footer />
     </SmoothScrollProvider>
