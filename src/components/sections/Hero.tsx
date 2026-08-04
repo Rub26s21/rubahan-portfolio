@@ -8,6 +8,7 @@ import { CountUp } from "@/components/CountUp";
 import { EmailPill } from "@/components/EmailPill";
 import { Magnetic } from "@/components/Magnetic";
 import { PlayReelButton } from "@/components/PlayReel";
+import { TextAnimation } from "@/components/TextAnimation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -16,6 +17,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export const Hero: React.FC = () => {
   const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const preloaderFinished = useAppStore((s) => s.preloaderFinished);
   const lenis = useSmoothScroll();
   const isDesktop = useMediaQuery("(min-width: 769px)");
 
@@ -31,10 +33,10 @@ export const Hero: React.FC = () => {
     SKILL_GROUPS.find((g) => g.key === "soft")?.skills.map((s) => s.name) || [];
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || !preloaderFinished) return;
 
     const ctx = gsap.context(() => {
-      // 1. LOAD SEQUENCE (one GSAP timeline, ~1.6s, once)
+      // 1. HERO LOAD SEQUENCE (plays once hand-off from preloader completes)
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
       // Giant RUBAHAN clips in from the left
@@ -47,17 +49,24 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // Photo starts scale 1.15 + blur(20px), settles sharp at scale 1
-      if (photoImgRef.current) {
+      // Photo Card starts centered, increases size reveal scale 1.35 -> 1.0 + blur clear
+      if (photoCardRef.current && photoImgRef.current) {
+        tl.fromTo(
+          photoCardRef.current,
+          { scale: 1.35, opacity: 0 },
+          { scale: 1.0, opacity: 1, duration: 1.2, ease: "power4.out" },
+          0
+        );
+
         tl.fromTo(
           photoImgRef.current,
-          { scale: 1.15, filter: "blur(20px)" },
-          { scale: 1, filter: "blur(0px)", duration: 1.2 },
+          { filter: "blur(24px)" },
+          { filter: "blur(0px)", duration: 1.2 },
           0.1
         );
       }
 
-      // H1 lines unmask top-to-bottom staggered ("Differently." last)
+      // H1 lines unmask top-to-bottom staggered
       if (h1Ref.current) {
         const split = new SplitText(h1Ref.current, {
           type: "lines,words",
@@ -83,11 +92,11 @@ export const Hero: React.FC = () => {
           [traitsRef.current, contentRef.current],
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-          0.9
+          0.8
         );
       }
 
-      // 2. HERO EXIT (pin hero for 150vh, scrub 0.8) — DESKTOP ONLY
+      // 2. HERO PIN EXIT (Moves photo to topmost left corner while scrolling)
       const section = sectionRef.current;
       if (!section || !isDesktop) return;
 
@@ -105,7 +114,7 @@ export const Hero: React.FC = () => {
         },
       });
 
-      // Giant RUBAHAN drifts up-left faster than scroll
+      // Monogram type drifts up-left
       if (monogramRef.current) {
         exitTl.to(
           monogramRef.current,
@@ -123,7 +132,7 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // Trait pills scatter slightly left
+      // Trait pills scatter left
       if (traitsRef.current) {
         exitTl.to(
           traitsRef.current,
@@ -132,18 +141,18 @@ export const Hero: React.FC = () => {
         );
       }
 
-      // Intro copy & buttons fade away
+      // Intro copy & CTA buttons fade away
       if (contentRef.current) {
         exitTl.to(contentRef.current, { y: -60, opacity: 0, ease: "none" }, 0);
       }
 
-      // PHOTO CARD scales to ~0.55, blurs to 24px, opacity 0.45, translates to the LEFT viewport edge (~4vw)
+      // PHOTO CARD MOVES TO THE TOPMOST CORNER OF THE LEFT SIDE (-36vw, -36vh, scale 0.55) AND STAYS ANCHORED
       if (photoCardRef.current && photoImgRef.current) {
         exitTl.to(
           photoCardRef.current,
           {
-            x: "-30vw",
-            y: "28vh",
+            x: "-36vw",
+            y: "-36vh",
             scale: 0.55,
             opacity: 0.45,
             ease: "power1.inOut",
@@ -163,7 +172,7 @@ export const Hero: React.FC = () => {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion, isDesktop]);
+  }, [reducedMotion, preloaderFinished, isDesktop]);
 
   const handleScrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -211,7 +220,7 @@ export const Hero: React.FC = () => {
 
       {/* Center Layout Container */}
       <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative z-10 mt-6">
-        {/* Central Photo Card */}
+        {/* Central Photo Card (Starts in center, increases size on load, moves to top-left corner on scroll) */}
         <div
           ref={photoCardRef}
           className="relative w-52 h-64 sm:w-60 sm:h-72 md:w-72 md:h-[360px] mb-6 select-none will-change-transform z-10"
@@ -252,17 +261,22 @@ export const Hero: React.FC = () => {
           <div className="font-serif italic text-deep">Differently.</div>
         </h1>
 
-        {/* Intro copy block */}
+        {/* Intro copy block with Motion Graphics */}
         <div
           ref={contentRef}
           className="max-w-xl text-center flex flex-col items-center gap-4 mt-2 will-change-transform"
         >
-          <p className="text-xs uppercase tracking-[0.2em] text-deep font-semibold">
-            {HERO_COPY.eyebrow}
-          </p>
-          <p className="text-xs md:text-sm text-mist leading-relaxed font-medium">
-            {HERO_COPY.intro}
-          </p>
+          <TextAnimation type="words">
+            <p className="text-xs uppercase tracking-[0.2em] text-deep font-semibold">
+              {HERO_COPY.eyebrow}
+            </p>
+          </TextAnimation>
+
+          <TextAnimation type="words">
+            <p className="text-xs md:text-sm text-mist leading-relaxed font-medium">
+              {HERO_COPY.intro}
+            </p>
+          </TextAnimation>
 
           <div className="flex flex-wrap items-center justify-center gap-3 mt-1">
             <Magnetic>
