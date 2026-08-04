@@ -3,6 +3,7 @@ import { useAppStore } from "@/lib/store";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { JOURNEY_CARDS } from "@/lib/site-copy";
 import { SectionHeading } from "@/components/SectionHeading";
+import { IdBadge } from "@/components/IdBadge";
 import { JourneyLine } from "@/components/JourneyLine";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import gsap from "gsap";
@@ -143,6 +144,11 @@ export const Journey: React.FC = () => {
       ref={containerRef}
       className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10 overflow-hidden"
     >
+      {/* Hanging ID Badge in Section Intro Whitespace (Desktop Only) */}
+      <div className="absolute right-8 md:right-16 top-16 hidden lg:block z-30">
+        <IdBadge />
+      </div>
+
       {/* Heading */}
       <SectionHeading
         eyebrow="About Me"

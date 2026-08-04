@@ -9,7 +9,7 @@ export const HERO_COPY = {
         { value: 5, label: "Flagship Projects" },
         { value: 3, label: "Years of Engineering" },
     ],
-}
+};
 
 export const JOURNEY_CARDS = [
     {
@@ -42,7 +42,7 @@ export const JOURNEY_CARDS = [
         story: "TODO(✏️): current focus and what's next.",
         handle: "@rubahan", timeAgo: "2 hours ago", photo: "/journey/26.jpg",
     },
-]
+];
 
 export const WORK_OUTCOMES = [
     { id: "real-estate-ai", chips: ["Python", "LangChain", "GPT-4o"], outcome: "Property document review: 3 days → 9 minutes, every finding cited." },
@@ -50,10 +50,10 @@ export const WORK_OUTCOMES = [
     { id: "aquashield", chips: ["ESP32", "LoRa", "MQTT"], outcome: "~15 min flood early-warning at ₹2.5k per node." },
     { id: "servo-control", chips: ["STM32", "PID", "1 kHz"], outcome: "±0.4° precision, 0% overshoot after tuning." },
     { id: "quiz-conquest", chips: ["React", "Socket.IO", "Redis"], outcome: "200+ concurrent players, <120 ms round-trip, 0 disputes." },
-]
+];
 
 export const CAPABILITIES_INTRO =
-    "AI, web, and silicon combined — turning real problems into systems that ship, perform, and keep working."
+    "AI, web, and silicon combined — turning real problems into systems that ship, perform, and keep working.";
 
 export const CAPABILITIES = [
     { title: "AI & ML Systems", desc: "Agents, RAG pipelines and applied ML that produce cited, auditable output — not demos." },
@@ -61,7 +61,7 @@ export const CAPABILITIES = [
     { title: "Embedded & IoT", desc: "From PCB to dashboard: firmware, sensors, LoRa/MQTT networks that survive the field." },
     { title: "Cloud & DevOps", desc: "Deployment, containers and pipelines so what ships keeps running." },
     { title: "End-to-End Ownership", desc: "I've run events, led a club and shipped solo — you get someone who finishes." },
-]
+];
 
 export const SERVICES = [
     {
@@ -79,7 +79,16 @@ export const SERVICES = [
         bullets: ["AI agents and integrations", "IoT dashboards and telemetry", "Full-stack web apps", "Scoped together on a call"],
         audience: "For problems that don't fit a template.",
     },
-]
+];
+
+export const REEL_ENABLED = true;
+
+export const PROCESS_STEPS = [
+    { step: "01", title: "Define", desc: "goals, users, constraints" },
+    { step: "02", title: "Design", desc: "type, motion, system" },
+    { step: "03", title: "Build", desc: "GSAP/React, clean data layer" },
+    { step: "04", title: "Launch", desc: "perf pass, deploy, iterate" },
+];
 
 export const FAQ_ITEMS = [
     { q: "Can you build a portfolio like this for me?", a: "Yes, that's exactly what the Portfolio Website service is. You bring your projects and story; I handle design, build, and deployment." },
@@ -88,10 +97,10 @@ export const FAQ_ITEMS = [
     { q: "Why a coded site instead of a website builder?", a: "Builders cap you at a template with your name on it. A coded site gives motion, performance and detail that make people stop scrolling — which is the whole point." },
     { q: "Do you take other freelance work?", a: "Yes — web apps, AI integrations, IoT dashboards. See Custom Build above." },
     { q: "Not sure what you need?", a: "No stress. Email me at rubahanponraj@gmail.com and tell me what you have in mind." },
-]
+];
 
-export const CTA_COPY = { line: "Have something in mind?", button: "Let's Talk" }
+export const CTA_COPY = { line: "Have something in mind?", button: "Let's Talk" };
 
 // Future testimonials swap into the Recognition carousel with this shape — real quotes only:
-export type Testimonial = { quote: string; name: string; role: string; link?: string }
-export const TESTIMONIALS: Testimonial[] = [] // empty until ≥3 genuine quotes exist
+export type Testimonial = { quote: string; name: string; role: string; link?: string };
+export const TESTIMONIALS: Testimonial[] = []; // empty until ≥3 genuine quotes exist

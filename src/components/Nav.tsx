@@ -124,6 +124,7 @@ export const Nav: React.FC = () => {
     { id: "projects", label: "Projects" },
     { id: "what-you-get", label: "What You Get" },
     { id: "services", label: "Services" },
+    { id: "process", label: "Process" },
     { id: "faq", label: "FAQ" },
   ];
 

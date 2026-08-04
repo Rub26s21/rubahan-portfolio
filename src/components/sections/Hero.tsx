@@ -7,6 +7,7 @@ import { PROFILE, SKILL_GROUPS } from "@/lib/data";
 import { CountUp } from "@/components/CountUp";
 import { EmailPill } from "@/components/EmailPill";
 import { Magnetic } from "@/components/Magnetic";
+import { PlayReelButton } from "@/components/PlayReel";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -233,6 +234,11 @@ export const Hero: React.FC = () => {
           <div className="absolute -left-4 sm:-left-10 bottom-10 bg-surface border border-mist/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg flex items-center gap-2 z-25 font-mono text-[9px] sm:text-xs text-ink whitespace-nowrap">
             <CountUp end={3} className="font-bold text-deep" />
             <span>Years of Engineering</span>
+          </div>
+
+          {/* Play Reel Button */}
+          <div className="absolute -right-14 bottom-6 z-30">
+            <PlayReelButton />
           </div>
         </div>
 

@@ -11,6 +11,8 @@ export interface AppState {
   setCursorLabel: (label: string) => void;
   reducedMotion: boolean;
   setReducedMotion: (reduced: boolean) => void;
+  preloaderFinished: boolean;
+  setPreloaderFinished: (finished: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -34,4 +36,11 @@ export const useAppStore = create<AppState>((set) => ({
   setCursorLabel: (label) => set({ cursorLabel: label }),
   reducedMotion: false,
   setReducedMotion: (reduced) => set({ reducedMotion: reduced }),
+  preloaderFinished: (() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("hasSeenPreloader") === "true";
+    }
+    return true;
+  })(),
+  setPreloaderFinished: (finished) => set({ preloaderFinished: finished }),
 }));
