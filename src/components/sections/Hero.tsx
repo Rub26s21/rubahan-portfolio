@@ -136,14 +136,13 @@ export const Hero: React.FC = () => {
         exitTl.to(contentRef.current, { y: -60, opacity: 0, ease: "none" }, 0);
       }
 
-      // PHOTO CARD scales to ~0.55, blurs to 24px, opacity 0.45, translates to the LEFT viewport edge
-      // Persists as blurred ghost behind Journey
+      // PHOTO CARD scales to ~0.55, blurs to 24px, opacity 0.45, translates to the LEFT viewport edge (~4vw)
       if (photoCardRef.current && photoImgRef.current) {
         exitTl.to(
           photoCardRef.current,
           {
-            x: -260,
-            y: 220,
+            x: "-30vw",
+            y: "28vh",
             scale: 0.55,
             opacity: 0.45,
             ease: "power1.inOut",

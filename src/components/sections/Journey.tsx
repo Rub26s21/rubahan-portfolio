@@ -38,7 +38,7 @@ export const Journey: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // 1. THIN CURVED SVG CONNECTOR PATH (mist color, ~1.5px)
+  // 1. THIN CURVED SVG CONNECTOR PATH (1.5px, #8FB3C7) DRAW-IN ON SCROLL
   useEffect(() => {
     const path = pathRef.current;
     const container = containerRef.current;
@@ -160,7 +160,7 @@ export const Journey: React.FC = () => {
         }
       });
 
-      // 3. DESKTOP BLURRED PHOTO GHOST DRIFT ACROSS CORNERS
+      // 3. DESKTOP FIXED PHOTO GHOST SEAMLESS HANDOFF & CORNER DRIFT
       if (isDesktop && ghostRef.current && containerRef.current) {
         const ghost = ghostRef.current;
         const container = containerRef.current;
@@ -168,18 +168,23 @@ export const Journey: React.FC = () => {
         const ghostTl = gsap.timeline({
           scrollTrigger: {
             trigger: container,
-            start: "top 60%",
-            end: "bottom 80%",
-            scrub: 1,
+            start: "top 80%",
+            end: "bottom 85%",
+            scrub: 0.8,
           },
         });
 
-        // Drift sequence: Left -> Right-Low -> Left-Low -> Right -> Fade Out
+        // Drift sequence: Left (~4vw) -> Low-Right (~68vw) -> Low-Left (~4vw) -> Right (~68vw) -> Fade Out after '26
         ghostTl
-          .to(ghost, { x: 420, y: 350, opacity: 0.4, ease: "none" })
-          .to(ghost, { x: -80, y: 700, opacity: 0.35, ease: "none" })
-          .to(ghost, { x: 380, y: 1050, opacity: 0.25, ease: "none" })
-          .to(ghost, { opacity: 0, y: 1350, ease: "power1.out" });
+          .fromTo(
+            ghost,
+            { x: 0, y: 0, opacity: 0 },
+            { x: 0, y: 0, opacity: 0.45, duration: 0.2, ease: "power1.out" }
+          )
+          .to(ghost, { x: "64vw", y: "20vh", opacity: 0.45, ease: "none" })
+          .to(ghost, { x: "0vw", y: "42vh", opacity: 0.45, ease: "none" })
+          .to(ghost, { x: "64vw", y: "60vh", opacity: 0.35, ease: "none" })
+          .to(ghost, { opacity: 0, y: "75vh", ease: "power1.out" });
       }
     }, containerRef);
 
@@ -192,11 +197,11 @@ export const Journey: React.FC = () => {
       ref={containerRef}
       className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10 overflow-hidden"
     >
-      {/* DESKTOP BLURRED HERO-PHOTO GHOST DRIFT ELEMENT */}
+      {/* DESKTOP FIXED PHOTO GHOST HANDOFF & DRIFT ELEMENT */}
       {isDesktop && !reducedMotion && (
         <div
           ref={ghostRef}
-          className="absolute left-8 top-32 w-64 h-80 rounded-2xl overflow-hidden pointer-events-none z-0 opacity-40 will-change-transform border border-mist/20"
+          className="fixed left-[4vw] top-[20vh] w-56 h-72 rounded-2xl overflow-hidden pointer-events-none z-[1] opacity-0 border border-mist/20 will-change-transform shadow-2xl"
           style={{
             filter: "blur(24px)",
           }}
@@ -213,19 +218,19 @@ export const Journey: React.FC = () => {
       <SectionHeading
         eyebrow="About Me"
         title="About Me (&) My Journey"
-        className="max-w-4xl mx-auto mb-24"
+        className="max-w-4xl mx-auto mb-24 relative z-10"
       />
 
       <div className="relative w-full max-w-4xl mx-auto flex flex-col gap-32 md:gap-40 z-10">
-        {/* Thin Curved SVG Connector Path (~1.5px mist color) */}
+        {/* Thin Curved SVG Connector Path (1.5px, #8FB3C7, mist color) */}
         <svg
-          className="absolute left-1/2 -translate-x-1/2 top-10 h-[92%] w-24 pointer-events-none z-0 hidden md:block text-mist/40"
+          className="absolute left-1/2 -translate-x-1/2 top-10 h-[92%] w-32 pointer-events-none z-[2] hidden md:block"
           fill="none"
         >
           <path
             ref={pathRef}
-            d="M 48 0 C 90 250 8 450 48 650 C 88 850 8 1050 48 1250 C 88 1450 8 1650 48 1850"
-            stroke="currentColor"
+            d="M 64 0 C 130 250 0 450 64 650 C 128 850 0 1050 64 1250 C 128 1450 0 1650 64 1850"
+            stroke="#8FB3C7"
             strokeWidth="1.5"
           />
         </svg>
