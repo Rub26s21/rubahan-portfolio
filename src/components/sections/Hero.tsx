@@ -232,7 +232,7 @@ export const Hero: React.FC = () => {
       </motion.div>
 
       {/* ── CENTER LAYOUT CONTAINER (Perfect Proportion Ratio) ── */}
-      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-2">
+      <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-0">
         {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Perfect Proportioned Cutout, Scale 1.15, Head Unclipped) ── */}
         <motion.div
           variants={portraitVariants}
@@ -352,7 +352,7 @@ export const Hero: React.FC = () => {
       {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY ── */}
       <motion.div
         variants={uiItemVariants}
-        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
+        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-2 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
       >
         <div className="max-w-xs font-bold">
           <p className="text-[#0B1F33] font-heading text-sm font-bold">
@@ -366,9 +366,6 @@ export const Hero: React.FC = () => {
           </p>
         </div>
       </motion.div>
-
-      {/* Bottom Center Handle Pill */}
-      <div className="w-12 h-1.5 bg-[#0B1F33]/20 rounded-full mx-auto mt-2" />
     </motion.section>
   );
 };
