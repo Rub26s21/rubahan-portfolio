@@ -65,7 +65,7 @@ export const Footer: React.FC = () => {
         { yPercent: 125, opacity: 0 },
         {
           yPercent: 0,
-          opacity: 1,
+          opacity: 0.85,
           duration: 1.0,
           stagger: 0.07,
           ease: "back.out(1.4)",
@@ -151,13 +151,13 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Giant Monogram Title in footer (Letter Roll-Up) */}
-      <div className="w-full text-center overflow-hidden font-heading font-bold text-[15vw] leading-none text-sky/15 uppercase tracking-tighter pointer-events-none mt-10 flex justify-center items-center select-none">
+      {/* Giant Monogram Title in footer (Strong Sky #38BDF8, High Opacity) */}
+      <div className="w-full text-center overflow-hidden font-heading font-bold text-[15vw] leading-none text-sky uppercase tracking-tighter pointer-events-none mt-10 flex justify-center items-center select-none">
         {nameChars.map((char, idx) => (
           <span key={idx} className="inline-block overflow-hidden py-2">
             <span
               ref={(el) => { lettersRef.current[idx] = el; }}
-              className="inline-block will-change-transform"
+              className="inline-block opacity-85 will-change-transform"
             >
               {char}
             </span>

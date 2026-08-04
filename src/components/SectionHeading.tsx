@@ -46,14 +46,14 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     tl.fromTo(
       eyebrowEl,
       { letterSpacing: "0.1em", opacity: 0 },
-      { letterSpacing: "0.3em", opacity: 1, duration: 1.2, ease: "power2.out" }
+      { letterSpacing: "0.25em", opacity: 1, duration: 1.0, ease: "power2.out" }
     );
 
     tl.fromTo(
       split.words,
-      { yPercent: 100 },
-      { yPercent: 0, duration: 0.8, ease: "power3.out", stagger: 0.03 },
-      "-=0.8"
+      { yPercent: 110 },
+      { yPercent: 0, duration: 0.85, ease: "power4.out", stagger: 0.035 },
+      "-=0.7"
     );
 
     return () => {
@@ -69,13 +69,13 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
     <div ref={containerRef} className={`flex flex-col gap-2 ${className}`}>
       <span
         ref={eyebrowRef}
-        className="font-mono text-xs uppercase tracking-[0.3em] text-deep"
+        className="font-mono text-xs md:text-sm uppercase tracking-[0.25em] text-deep font-semibold mb-1 block"
       >
         {eyebrow}
       </span>
       <h2
         ref={titleRef}
-        className="font-heading text-4xl md:text-5xl font-semibold text-ink leading-tight"
+        className="font-heading text-[clamp(2.5rem,7vw,6rem)] font-bold text-ink leading-[0.95] tracking-tight"
       >
         {title}
       </h2>

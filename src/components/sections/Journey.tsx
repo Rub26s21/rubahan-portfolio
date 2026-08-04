@@ -60,7 +60,7 @@ export const Journey: React.FC = () => {
     };
   }, [reducedMotion]);
 
-  // 2. SCRUBBED ZIGZAG CARDS + CRISS-CROSS YEARS + FOOTER POPS
+  // 2. SCRUBBED ZIGZAG CARDS + CRISS-CROSS GIANT YEARS + FOOTER POPS
   useEffect(() => {
     if (reducedMotion) return;
 
@@ -74,7 +74,7 @@ export const Journey: React.FC = () => {
         const isOdd = idx % 2 === 0;
         const initialX = isOdd ? -120 : 120;
         const initialRot = isOdd ? -4 : 4;
-        const yearInitialX = isOdd ? 120 : -120;
+        const yearInitialX = isOdd ? 140 : -140;
 
         // Card Zigzag entrance
         gsap.fromTo(
@@ -94,19 +94,19 @@ export const Journey: React.FC = () => {
           }
         );
 
-        // Criss-Cross Year Numeral (opposite horizontal movement)
+        // Criss-Cross Giant Year Numeral (opposite horizontal movement)
         if (year) {
           gsap.fromTo(
             year,
-            { x: yearInitialX, opacity: 0.1 },
+            { x: yearInitialX, opacity: 0.2 },
             {
-              x: isOdd ? -40 : 40,
-              opacity: 0.35,
+              x: isOdd ? -60 : 60,
+              opacity: 0.7,
               ease: "none",
               scrollTrigger: {
                 trigger: card,
                 start: "top 95%",
-                end: "bottom 30%",
+                end: "bottom 25%",
                 scrub: 0.8,
               },
             }
@@ -146,11 +146,11 @@ export const Journey: React.FC = () => {
       {/* Heading */}
       <SectionHeading
         eyebrow="About Me"
-        title="My Journey"
-        className="max-w-4xl mx-auto mb-20"
+        title="About Me (&) My Journey"
+        className="max-w-4xl mx-auto mb-24"
       />
 
-      <div className="relative w-full max-w-4xl mx-auto flex flex-col gap-28 md:gap-32">
+      <div className="relative w-full max-w-4xl mx-auto flex flex-col gap-32 md:gap-40">
         {/* Snaking Connecting Path */}
         <svg
           className="absolute left-1/2 -translate-x-1/2 top-10 h-[92%] w-24 pointer-events-none z-0 hidden md:block text-mist/30"
@@ -172,15 +172,15 @@ export const Journey: React.FC = () => {
             <div
               key={idx}
               ref={(el) => { cardsRef.current[idx] = el; }}
-              className={`relative flex flex-col gap-4 p-6 bg-surface border border-mist/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full max-w-lg z-10 will-change-transform ${
+              className={`relative flex flex-col gap-4 p-6 md:p-8 bg-surface border border-mist/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full max-w-lg z-10 will-change-transform ${
                 idx % 2 === 0 ? "md:self-start" : "md:self-end"
               }`}
             >
-              {/* Scrub-sliding Year numeral (Criss-Cross) */}
+              {/* GIANT SKY DISPLAY YEAR NUMERAL (clamp(6rem, 18vw, 16rem)) */}
               <div
                 ref={(el) => { yearsRef.current[idx] = el; }}
-                className={`absolute -top-14 font-heading font-bold text-7xl md:text-8xl text-sky/25 select-none z-0 pointer-events-none will-change-transform ${
-                  idx % 2 === 0 ? "-left-4" : "-right-4"
+                className={`absolute -top-20 md:-top-28 font-heading font-bold text-[clamp(6rem,18vw,16rem)] text-sky leading-none select-none z-0 pointer-events-none opacity-75 tracking-tighter will-change-transform ${
+                  idx % 2 === 0 ? "-left-6 md:-left-12" : "-right-6 md:-right-12"
                 }`}
               >
                 {card.year}
@@ -188,10 +188,10 @@ export const Journey: React.FC = () => {
 
               {/* Card Contents */}
               <div className="relative z-10">
-                <h3 className="font-heading text-lg font-semibold text-ink mb-1">
+                <h3 className="font-heading text-xl md:text-2xl font-bold text-ink mb-2">
                   {card.title}
                 </h3>
-                <p className="text-xs md:text-sm text-mist leading-relaxed">
+                <p className="text-xs md:text-sm text-mist leading-relaxed font-medium">
                   {card.teaser}
                 </p>
 
@@ -207,11 +207,11 @@ export const Journey: React.FC = () => {
                 {/* Card footer */}
                 <div
                   ref={(el) => { footersRef.current[idx] = el; }}
-                  className="flex items-center gap-3 border-t border-mist/10 pt-4 mt-4 will-change-transform"
+                  className="flex items-center gap-3 border-t border-mist/10 pt-4 mt-6 will-change-transform"
                 >
                   <img
                     src="/photo.jpg"
-                    className="w-7 h-7 rounded-full object-cover border border-mist/15"
+                    className="w-8 h-8 rounded-full object-cover border border-mist/15"
                     alt=""
                   />
                   <div className="flex flex-col text-[10px] font-mono text-mist leading-tight">
@@ -270,7 +270,7 @@ const CardExpansion: React.FC<CardExpansionProps> = ({
     >
       <div className="overflow-hidden">
         <div className="pt-4 flex flex-col gap-4">
-          <p className="text-xs md:text-sm text-mist leading-relaxed">
+          <p className="text-xs md:text-sm text-mist leading-relaxed font-medium">
             {story}
           </p>
 

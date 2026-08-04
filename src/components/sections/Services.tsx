@@ -25,7 +25,7 @@ export const Services: React.FC = () => {
     if (reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // 1. CONVERGENT CARDS ANIMATION (left from bottom-left, middle from bottom, right from bottom-right)
+      // 1. CONVERGENT CARDS ANIMATION
       cardsRef.current.forEach((card, idx) => {
         if (!card) return;
 
@@ -93,7 +93,7 @@ export const Services: React.FC = () => {
         </p>
 
         {/* 3 Convergent Services Decks */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-28">
           {SERVICES.map((service, idx) => {
             const isFree = service.price === "Free";
 
@@ -151,18 +151,18 @@ export const Services: React.FC = () => {
           })}
         </div>
 
-        {/* Full-width CTA Band with Isolated Amber Hover Moment */}
+        {/* Full-Viewport-Width CTA Band with Giant Display Text & Amber Hover */}
         <div
           ref={ctaBandRef}
-          className="w-full bg-[#0B1F33] text-surface rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl overflow-hidden relative"
+          className="w-full bg-[#0B1F33] text-surface rounded-3xl p-10 md:p-20 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl overflow-hidden relative"
         >
-          <div className="max-w-md text-center md:text-left">
-            <span className="font-mono text-xs uppercase tracking-widest text-mist mb-2 block">
+          <div className="max-w-xl text-center md:text-left">
+            <span className="font-mono text-xs uppercase tracking-[0.25em] text-mist mb-3 block font-semibold">
               Get In Touch
             </span>
             <h3
               ref={ctaTitleRef}
-              className="font-heading text-3xl md:text-5xl font-bold text-white leading-tight will-change-transform"
+              className="font-heading text-[clamp(2.5rem,6vw,5rem)] font-bold text-white leading-[0.95] tracking-tight will-change-transform"
             >
               {CTA_COPY.line}
             </h3>
@@ -172,7 +172,7 @@ export const Services: React.FC = () => {
             <Magnetic>
               <a
                 href={`mailto:${PROFILE.email}`}
-                className="px-10 py-5 bg-sky text-ink font-heading font-bold text-lg md:text-xl rounded-full transition-colors duration-300 shadow-xl cursor-pointer block hover:bg-[#FFB86B] hover:text-ink"
+                className="px-10 py-5 bg-sky text-ink font-heading font-bold text-xl md:text-2xl rounded-full transition-all duration-300 shadow-2xl cursor-pointer block hover:bg-[#FFB86B] hover:text-ink hover:scale-105"
               >
                 {CTA_COPY.button}
               </a>
