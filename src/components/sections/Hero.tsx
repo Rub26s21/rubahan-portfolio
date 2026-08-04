@@ -9,7 +9,7 @@ import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
 import { Sparkles, ShieldCheck, Target, Hammer, Zap } from "lucide-react";
 
 // ==========================================
-// FRAMER MOTION VARIANTS ARCHITECTURE
+// FAST, SNAPPY FRAMER MOTION VARIANTS
 // ==========================================
 
 // Master Container Orchestrator
@@ -20,13 +20,13 @@ const containerVariants: Variants = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3,
-      delayChildren: 0.1,
+      staggerChildren: 0.15,
+      delayChildren: 0.05,
     },
   },
 };
 
-// Phase 1: Backdrop Giant Display Text ("RUBAHAN")
+// Phase 1: Backdrop Display Text ("RUBAHAN") — 0.6s easeOut
 const backgroundTextVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -38,13 +38,13 @@ const backgroundTextVariants: Variants = {
     scale: 1.0,
     y: 0,
     transition: {
-      duration: 1.2,
+      duration: 0.6,
       ease: [0.16, 1, 0.3, 1], // easeOut
     },
   },
 };
 
-// Phase 2: Subject Hero Cutout Portrait
+// Phase 2: Subject Hero Portrait Cutout — 0.5s slide-up
 const portraitVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -56,25 +56,25 @@ const portraitVariants: Variants = {
     y: 0,
     scale: 1.0,
     transition: {
-      duration: 1.1,
+      duration: 0.5,
       ease: [0.16, 1, 0.3, 1],
     },
   },
 };
 
-// Phase 3: Interface Container (Orchestrates floating cards, nav, headline, buttons)
+// Phase 3: Interface Container (Rapid-fire cascade stagger: 0.06s)
 const uiContainerVariants: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1,
+      staggerChildren: 0.06,
+      delayChildren: 0.02,
     },
   },
 };
 
-// Floating Left Stats Cards (Spring physics: stiffness 100, damping 10)
+// Floating Left Stats Cards (Spring physics: stiffness 120, damping 12)
 const leftCardVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -87,13 +87,13 @@ const leftCardVariants: Variants = {
     scale: 1.0,
     transition: {
       type: "spring",
-      stiffness: 100,
-      damping: 10,
+      stiffness: 120,
+      damping: 12,
     },
   },
 };
 
-// Floating Right Traits Glass Card (Spring physics: stiffness 100, damping 10)
+// Floating Right Traits Glass Card (Spring physics: stiffness 120, damping 12)
 const rightCardVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -106,8 +106,8 @@ const rightCardVariants: Variants = {
     scale: 1.0,
     transition: {
       type: "spring",
-      stiffness: 100,
-      damping: 10,
+      stiffness: 120,
+      damping: 12,
     },
   },
 };
@@ -116,20 +116,20 @@ const rightCardVariants: Variants = {
 const headlineVariants: Variants = {
   hidden: {
     opacity: 0,
-    y: 40,
+    y: 35,
   },
   show: {
     opacity: 1,
     y: 0,
     transition: {
       type: "spring",
-      stiffness: 100,
+      stiffness: 120,
       damping: 12,
     },
   },
 };
 
-// Action Buttons Spring Pop
+// Action Buttons Spring Pop (Stiffness 140, Damping 12)
 const ctaButtonVariants: Variants = {
   hidden: {
     opacity: 0,
@@ -142,8 +142,8 @@ const ctaButtonVariants: Variants = {
     y: 0,
     transition: {
       type: "spring",
-      stiffness: 120,
-      damping: 10,
+      stiffness: 140,
+      damping: 12,
     },
   },
 };
@@ -158,7 +158,7 @@ const uiItemVariants: Variants = {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.6,
+      duration: 0.4,
       ease: [0.16, 1, 0.3, 1],
     },
   },
@@ -196,7 +196,7 @@ export const Hero: React.FC = () => {
         RUBAHAN
       </motion.div>
 
-      {/* ── PHASE 3: SPLIT TOP NAVIGATION BAR (z-20) ── */}
+      {/* ── PHASE 3: SINGLE CLEAN HORIZONTAL TOP NAVIGATION BAR (z-20) ── */}
       <motion.div
         variants={uiItemVariants}
         className="w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-4 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33]"
@@ -222,15 +222,15 @@ export const Hero: React.FC = () => {
 
       {/* ── CENTER LAYOUT CONTAINER ── */}
       <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-12">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT PHOTO (z-10) ── */}
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT CUTOUT (No Background Box, z-10) ── */}
         <motion.div
           variants={portraitVariants}
-          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white/20 backdrop-blur-sm z-10 will-change-transform"
+          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] z-10 will-change-transform"
         >
           <img
             src="/photo.jpg"
             alt="Rubahan P"
-            className="w-full h-full object-cover select-none"
+            className="w-full h-full object-cover select-none rounded-3xl shadow-2xl"
           />
 
           {/* Circular Glass Play Reel Button */}
