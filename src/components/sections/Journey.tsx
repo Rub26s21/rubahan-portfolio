@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { JOURNEY_CARDS } from "@/lib/site-copy";
 import { SectionHeading } from "@/components/SectionHeading";
 import { useActiveSection } from "@/hooks/useActiveSection";
@@ -11,11 +12,14 @@ gsap.registerPlugin(ScrollTrigger);
 export const Journey: React.FC = () => {
   useActiveSection("about");
   const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const isDesktop = useMediaQuery("(min-width: 769px)");
+
   const containerRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const yearsRef = useRef<(HTMLDivElement | null)[]>([]);
   const footersRef = useRef<(HTMLDivElement | null)[]>([]);
+  const ghostRef = useRef<HTMLDivElement>(null);
 
   const [expandedCardIndex, setExpandedCardIndex] = useState<number | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
@@ -34,7 +38,7 @@ export const Journey: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // 1. SNAKING SVG PATH DRAW-IN ON SCROLL
+  // 1. THIN CURVED SVG CONNECTOR PATH (mist color, ~1.5px)
   useEffect(() => {
     const path = pathRef.current;
     const container = containerRef.current;
@@ -60,7 +64,7 @@ export const Journey: React.FC = () => {
     };
   }, [reducedMotion]);
 
-  // 2. SCRUBBED ZIGZAG CARDS + CRISS-CROSS GIANT YEARS + FOOTER POPS
+  // 2. CARDS ZIGZAG + CRISS-CROSS PARALLAX YEARS + DELAYED FOOTER POPS (+0.15s)
   useEffect(() => {
     if (reducedMotion) return;
 
@@ -72,48 +76,71 @@ export const Journey: React.FC = () => {
         if (!card) return;
 
         const isOdd = idx % 2 === 0;
-        const initialX = isOdd ? -120 : 120;
-        const initialRot = isOdd ? -4 : 4;
-        const yearInitialX = isOdd ? 140 : -140;
 
-        // Card Zigzag entrance
-        gsap.fromTo(
-          card,
-          { x: initialX, rotate: initialRot, opacity: 0 },
-          {
-            x: 0,
-            rotate: 0,
-            opacity: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 88%",
-              end: "top 55%",
-              scrub: 0.8,
-            },
-          }
-        );
+        if (isDesktop) {
+          // Desktop entrance: x: ±120, rotate: ±4deg -> 0
+          const initialX = isOdd ? -120 : 120;
+          const initialRot = isOdd ? -4 : 4;
+          const yearInitialX = isOdd ? 140 : -140;
 
-        // Criss-Cross Giant Year Numeral (opposite horizontal movement)
-        if (year) {
           gsap.fromTo(
-            year,
-            { x: yearInitialX, opacity: 0.2 },
+            card,
+            { x: initialX, rotate: initialRot, opacity: 0 },
             {
-              x: isOdd ? -60 : 60,
-              opacity: 0.7,
-              ease: "none",
+              x: 0,
+              rotate: 0,
+              opacity: 1,
+              ease: "power2.out",
               scrollTrigger: {
                 trigger: card,
-                start: "top 95%",
-                end: "bottom 25%",
+                start: "top 88%",
+                end: "top 55%",
                 scrub: 0.8,
+              },
+            }
+          );
+
+          // Criss-cross parallax year numeral (opposite direction + slower y-parallax)
+          if (year) {
+            gsap.fromTo(
+              year,
+              { x: yearInitialX, y: 30, opacity: 0.2 },
+              {
+                x: isOdd ? -60 : 60,
+                y: -30,
+                opacity: 0.75,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 95%",
+                  end: "bottom 25%",
+                  scrub: 0.8,
+                },
+              }
+            );
+          }
+        } else {
+          // Mobile entrance: single-column alternate sides ±40px, NO rotation
+          const mobileX = isOdd ? -40 : 40;
+          gsap.fromTo(
+            card,
+            { x: mobileX, rotate: 0, opacity: 0 },
+            {
+              x: 0,
+              rotate: 0,
+              opacity: 1,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 90%",
+                end: "top 65%",
+                scrub: 0.6,
               },
             }
           );
         }
 
-        // Footer pop slightly delayed
+        // Card footer pops ~0.15s after card body
         if (footer) {
           gsap.fromTo(
             footer,
@@ -121,10 +148,10 @@ export const Journey: React.FC = () => {
             {
               scale: 1,
               opacity: 1,
-              ease: "back.out(1.5)",
+              ease: "back.out(1.6)",
               scrollTrigger: {
                 trigger: card,
-                start: "top 70%",
+                start: "top 72%",
                 end: "top 45%",
                 scrub: 0.6,
               },
@@ -132,17 +159,56 @@ export const Journey: React.FC = () => {
           );
         }
       });
+
+      // 3. DESKTOP BLURRED PHOTO GHOST DRIFT ACROSS CORNERS
+      if (isDesktop && ghostRef.current && containerRef.current) {
+        const ghost = ghostRef.current;
+        const container = containerRef.current;
+
+        const ghostTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            start: "top 60%",
+            end: "bottom 80%",
+            scrub: 1,
+          },
+        });
+
+        // Drift sequence: Left -> Right-Low -> Left-Low -> Right -> Fade Out
+        ghostTl
+          .to(ghost, { x: 420, y: 350, opacity: 0.4, ease: "none" })
+          .to(ghost, { x: -80, y: 700, opacity: 0.35, ease: "none" })
+          .to(ghost, { x: 380, y: 1050, opacity: 0.25, ease: "none" })
+          .to(ghost, { opacity: 0, y: 1350, ease: "power1.out" });
+      }
     }, containerRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, isDesktop]);
 
   return (
     <section
       id="about"
       ref={containerRef}
-      className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10"
+      className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10 overflow-hidden"
     >
+      {/* DESKTOP BLURRED HERO-PHOTO GHOST DRIFT ELEMENT */}
+      {isDesktop && !reducedMotion && (
+        <div
+          ref={ghostRef}
+          className="absolute left-8 top-32 w-64 h-80 rounded-2xl overflow-hidden pointer-events-none z-0 opacity-40 will-change-transform border border-mist/20"
+          style={{
+            filter: "blur(24px)",
+          }}
+        >
+          <img
+            src="/photo.jpg"
+            className="w-full h-full object-cover"
+            alt=""
+          />
+        </div>
+      )}
+
       {/* Heading */}
       <SectionHeading
         eyebrow="About Me"
@@ -150,17 +216,17 @@ export const Journey: React.FC = () => {
         className="max-w-4xl mx-auto mb-24"
       />
 
-      <div className="relative w-full max-w-4xl mx-auto flex flex-col gap-32 md:gap-40">
-        {/* Snaking Connecting Path */}
+      <div className="relative w-full max-w-4xl mx-auto flex flex-col gap-32 md:gap-40 z-10">
+        {/* Thin Curved SVG Connector Path (~1.5px mist color) */}
         <svg
-          className="absolute left-1/2 -translate-x-1/2 top-10 h-[92%] w-24 pointer-events-none z-0 hidden md:block text-mist/30"
+          className="absolute left-1/2 -translate-x-1/2 top-10 h-[92%] w-24 pointer-events-none z-0 hidden md:block text-mist/40"
           fill="none"
         >
           <path
             ref={pathRef}
             d="M 48 0 C 90 250 8 450 48 650 C 88 850 8 1050 48 1250 C 88 1450 8 1650 48 1850"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.5"
           />
         </svg>
 
@@ -204,7 +270,7 @@ export const Journey: React.FC = () => {
                   onImageError={() => handleImageError(idx)}
                 />
 
-                {/* Card footer */}
+                {/* Card footer (Pops ~0.15s after card body) */}
                 <div
                   ref={(el) => { footersRef.current[idx] = el; }}
                   className="flex items-center gap-3 border-t border-mist/10 pt-4 mt-6 will-change-transform"
