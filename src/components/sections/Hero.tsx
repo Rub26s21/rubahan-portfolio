@@ -1,153 +1,171 @@
-import React, { useEffect, useRef } from "react";
-import { useAppStore } from "@/lib/store";
-import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import React from "react";
+import { motion, type Variants } from "framer-motion";
 import { HERO_COPY } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
 import { CountUp } from "@/components/CountUp";
 import { Magnetic } from "@/components/Magnetic";
 import { PlayReelButton } from "@/components/PlayReel";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SplitText } from "gsap/SplitText";
+import { useSmoothScroll } from "@/providers/SmoothScrollProvider";
 import { Sparkles, ShieldCheck, Target, Hammer, Zap } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+// ==========================================
+// FRAMER MOTION VARIANTS ARCHITECTURE
+// ==========================================
+
+// Master Container Orchestrator
+const containerVariants: Variants = {
+  hidden: {
+    opacity: 0,
+  },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.3,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+// Phase 1: Backdrop Giant Display Text ("RUBAHAN")
+const backgroundTextVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 1.1,
+    y: -20,
+  },
+  show: {
+    opacity: 1,
+    scale: 1.0,
+    y: 0,
+    transition: {
+      duration: 1.2,
+      ease: [0.16, 1, 0.3, 1], // easeOut
+    },
+  },
+};
+
+// Phase 2: Subject Hero Cutout Portrait
+const portraitVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 100,
+    scale: 0.95,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1.0,
+    transition: {
+      duration: 1.1,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
+// Phase 3: Interface Container (Orchestrates floating cards, nav, headline, buttons)
+const uiContainerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+// Floating Left Stats Cards (Spring physics: stiffness 100, damping 10)
+const leftCardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    x: -80,
+    scale: 0.85,
+  },
+  show: {
+    opacity: 1,
+    x: 0,
+    scale: 1.0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10,
+    },
+  },
+};
+
+// Floating Right Traits Glass Card (Spring physics: stiffness 100, damping 10)
+const rightCardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    x: 80,
+    scale: 0.85,
+  },
+  show: {
+    opacity: 1,
+    x: 0,
+    scale: 1.0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 10,
+    },
+  },
+};
+
+// Headline Overlay Lines
+const headlineVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 100,
+      damping: 12,
+    },
+  },
+};
+
+// Action Buttons Spring Pop
+const ctaButtonVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.5,
+    y: 20,
+  },
+  show: {
+    opacity: 1,
+    scale: 1.0,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 120,
+      damping: 10,
+    },
+  },
+};
+
+// Navigation Links & Editorial Footer Copy
+const uiItemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 15,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
 
 export const Hero: React.FC = () => {
-  const reducedMotion = useAppStore((s) => s.reducedMotion);
-  const preloaderFinished = useAppStore((s) => s.preloaderFinished);
   const lenis = useSmoothScroll();
-  const isDesktop = useMediaQuery("(min-width: 769px)");
-
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const giantTextRef = useRef<HTMLDivElement>(null);
-  const photoRef = useRef<HTMLDivElement>(null);
-  const h1Ref = useRef<HTMLHeadingElement>(null);
-  const leftCardsRef = useRef<HTMLDivElement>(null);
-  const rightCardRef = useRef<HTMLDivElement>(null);
-  const navLeftRef = useRef<HTMLDivElement>(null);
-  const navRightRef = useRef<HTMLDivElement>(null);
-  const bottomCopyRef = useRef<HTMLDivElement>(null);
-  const ctaButtonsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (reducedMotion || !preloaderFinished) return;
-
-    const ctx = gsap.context(() => {
-      // Timeline exactly replicating the 7-phase frame sequence in hey.mp4
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-      // Phase 1 (0.2s): Giant Neon Display Name "RUBAHAN" unmasks across top
-      if (giantTextRef.current) {
-        tl.fromTo(
-          giantTextRef.current,
-          { opacity: 0, scale: 0.9, y: -30 },
-          { opacity: 1, scale: 1.0, y: 0, duration: 1.0, ease: "power4.out" },
-          0.2
-        );
-      }
-
-      // Phase 2 (0.7s): Centered Portrait Photo slides UP from bottom center
-      if (photoRef.current) {
-        tl.fromTo(
-          photoRef.current,
-          { opacity: 0, yPercent: 60, scale: 0.92 },
-          { opacity: 1, yPercent: 0, scale: 1.0, duration: 1.1, ease: "power3.out" },
-          0.6
-        );
-      }
-
-      // Phase 3 (1.3s): Overlay Headline Text "Engineering, Applied Differently." unmasks over torso
-      if (h1Ref.current) {
-        const split = new SplitText(h1Ref.current, {
-          type: "lines,words",
-          linesClass: "line-mask",
-        });
-
-        tl.fromTo(
-          split.lines,
-          { yPercent: 120, opacity: 0 },
-          {
-            yPercent: 0,
-            opacity: 1,
-            duration: 0.85,
-            ease: "power4.out",
-            stagger: 0.12,
-          },
-          1.2
-        );
-      }
-
-      // Phase 4 (1.9s): Floating Left Stats Cards slide in from left edge
-      if (leftCardsRef.current) {
-        tl.fromTo(
-          leftCardsRef.current,
-          { opacity: 0, x: -100, scale: 0.85 },
-          { opacity: 1, x: 0, scale: 1.0, duration: 0.8, ease: "back.out(1.7)" },
-          1.8
-        );
-      }
-
-      // Phase 5 (2.1s): Right Glass Traits List Card slides in from right edge
-      if (rightCardRef.current) {
-        tl.fromTo(
-          rightCardRef.current,
-          { opacity: 0, x: 100, scale: 0.85 },
-          { opacity: 1, x: 0, scale: 1.0, duration: 0.8, ease: "back.out(1.7)" },
-          2.0
-        );
-      }
-
-      // Phase 6 (2.3s): Action Buttons spring-pop up under headline text
-      if (ctaButtonsRef.current) {
-        tl.fromTo(
-          ctaButtonsRef.current,
-          { opacity: 0, scale: 0, y: 30 },
-          { opacity: 1, scale: 1.0, y: 0, duration: 0.7, ease: "back.out(2.0)" },
-          2.2
-        );
-      }
-
-      // Phase 7 (2.6s): Top split nav bar links & bottom editorial copy fade in
-      if (navLeftRef.current && navRightRef.current && bottomCopyRef.current) {
-        tl.fromTo(
-          [navLeftRef.current, navRightRef.current, bottomCopyRef.current],
-          { opacity: 0, y: 15 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
-          2.5
-        );
-      }
-
-      // Scroll Parallax: Photo & Giant Type move smoothly UP on scroll (never vanishes)
-      const section = sectionRef.current;
-      if (!section || !isDesktop) return;
-
-      gsap.to(photoRef.current, {
-        y: "-140px",
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: "bottom top",
-          scrub: 0.5,
-        },
-      });
-
-      gsap.to(giantTextRef.current, {
-        y: "-80px",
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: "bottom top",
-          scrub: 0.5,
-        },
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [reducedMotion, preloaderFinished, isDesktop]);
 
   const handleScrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -160,25 +178,30 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <section
+    <motion.section
       id="hero"
-      ref={sectionRef}
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
       className="relative min-h-screen w-full bg-[#E1DDD3] text-[#0B1F33] flex flex-col justify-between items-center py-8 px-6 md:px-12 select-none z-10 overflow-hidden"
     >
-      {/* ── GIANT NEON DISPLAY NAME "RUBAHAN" ── */}
-      <div
-        ref={giantTextRef}
-        className="absolute top-2 left-0 w-full text-center font-heading font-extrabold text-[22vw] leading-none text-[#CCFF00] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform opacity-0"
+      {/* ── PHASE 1: BACKDROP GIANT DISPLAY NAME "RUBAHAN" (z-0) ── */}
+      <motion.div
+        variants={backgroundTextVariants}
+        className="absolute top-2 left-0 w-full text-center font-heading font-extrabold text-[22vw] leading-none text-[#CCFF00] tracking-tighter uppercase z-0 pointer-events-none overflow-hidden whitespace-nowrap select-none will-change-transform"
         style={{
           textShadow: "0 10px 40px rgba(204,255,0,0.25)",
         }}
       >
         RUBAHAN
-      </div>
+      </motion.div>
 
-      {/* ── SPLIT TOP NAVIGATION BAR ── */}
-      <div className="w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-4 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33]">
-        <div ref={navLeftRef} className="flex gap-6 items-center opacity-0">
+      {/* ── PHASE 3: SPLIT TOP NAVIGATION BAR (z-20) ── */}
+      <motion.div
+        variants={uiItemVariants}
+        className="w-full max-w-7xl mx-auto flex justify-between items-center z-20 pt-4 hidden md:flex font-mono text-xs font-bold uppercase tracking-wider text-[#0B1F33]"
+      >
+        <div className="flex gap-6 items-center">
           <button onClick={() => handleScrollTo("hero")} className="hover:text-[#88A000] transition-colors cursor-pointer">HOME</button>
           <span>|</span>
           <button onClick={() => handleScrollTo("about")} className="hover:text-[#88A000] transition-colors cursor-pointer">ABOUT ME</button>
@@ -186,7 +209,7 @@ export const Hero: React.FC = () => {
           <button onClick={() => handleScrollTo("projects")} className="hover:text-[#88A000] transition-colors cursor-pointer">PROJECTS</button>
         </div>
 
-        <div ref={navRightRef} className="flex gap-6 items-center opacity-0">
+        <div className="flex gap-6 items-center">
           <button onClick={() => handleScrollTo("what-you-get")} className="hover:text-[#88A000] transition-colors cursor-pointer">WHAT YOU GET</button>
           <span>|</span>
           <button onClick={() => handleScrollTo("services")} className="hover:text-[#88A000] transition-colors cursor-pointer">SERVICES</button>
@@ -195,14 +218,14 @@ export const Hero: React.FC = () => {
           <span>|</span>
           <button onClick={() => handleScrollTo("faq")} className="hover:text-[#88A000] transition-colors cursor-pointer">FAQ</button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* ── CENTER PORTRAIT & OVERLAY CONTENT ── */}
+      {/* ── CENTER LAYOUT CONTAINER ── */}
       <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-12">
-        {/* CENTERED PORTRAIT PHOTO */}
-        <div
-          ref={photoRef}
-          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white/20 backdrop-blur-sm z-10 will-change-transform opacity-0"
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT PHOTO (z-10) ── */}
+        <motion.div
+          variants={portraitVariants}
+          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/40 bg-white/20 backdrop-blur-sm z-10 will-change-transform"
         >
           <img
             src="/photo.jpg"
@@ -214,110 +237,116 @@ export const Hero: React.FC = () => {
           <div className="absolute right-4 bottom-6 z-30">
             <PlayReelButton />
           </div>
-        </div>
+        </motion.div>
 
-        {/* ── FLOATING LEFT STATS CARDS ── */}
-        <div
-          ref={leftCardsRef}
-          className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex will-change-transform opacity-0"
+        {/* ── PHASE 3: INTERFACE CONTAINER (z-20 / z-30) ── */}
+        <motion.div
+          variants={uiContainerVariants}
+          className="absolute inset-0 pointer-events-none flex items-center justify-center z-20"
         >
-          {/* Card 1: 5 Flagship Projects */}
-          <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
-            <div className="w-12 h-12 rounded-xl bg-[#CCFF00] flex items-center justify-center text-[#0B1F33] font-bold text-xl shadow-md">
-              <Sparkles className="w-6 h-6 fill-current" />
-            </div>
-            <div className="flex flex-col font-mono">
-              <div className="font-heading font-bold text-lg text-[#0B1F33] leading-none">
-                <CountUp end={5} />+
+          {/* FLOATING LEFT STATS CARDS */}
+          <motion.div
+            variants={leftCardVariants}
+            className="absolute left-0 sm:left-4 top-1/3 flex flex-col gap-4 z-20 hidden lg:flex pointer-events-auto"
+          >
+            {/* Card 1: 5 Flagship Projects */}
+            <div className="p-4 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex items-center gap-4 w-52">
+              <div className="w-12 h-12 rounded-xl bg-[#CCFF00] flex items-center justify-center text-[#0B1F33] font-bold text-xl shadow-md">
+                <Sparkles className="w-6 h-6 fill-current" />
               </div>
-              <span className="text-[10px] text-[#0B1F33]/70 font-semibold uppercase">
-                Projects Shipped
+              <div className="flex flex-col font-mono">
+                <div className="font-heading font-bold text-lg text-[#0B1F33] leading-none">
+                  <CountUp end={5} />+
+                </div>
+                <span className="text-[10px] text-[#0B1F33]/70 font-semibold uppercase">
+                  Projects Shipped
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: 3+ Years of Experience */}
+            <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-1 w-52">
+              <div className="font-heading font-bold text-3xl text-[#CCFF00] drop-shadow-sm leading-none">
+                <CountUp end={3} />+
+              </div>
+              <span className="font-mono text-[10px] text-[#0B1F33]/80 font-bold uppercase tracking-wider">
+                Years of Experience
               </span>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Card 2: 3+ Years of Experience */}
-          <div className="p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-1 w-52">
-            <div className="font-heading font-bold text-3xl text-[#CCFF00] drop-shadow-sm leading-none">
-              <CountUp end={3} />+
-            </div>
-            <span className="font-mono text-[10px] text-[#0B1F33]/80 font-bold uppercase tracking-wider">
-              Years of Experience
-            </span>
-          </div>
-        </div>
-
-        {/* ── FLOATING RIGHT TRAITS GLASS LIST CARD ── */}
-        <div
-          ref={rightCardRef}
-          className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 will-change-transform opacity-0"
-        >
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0B1F33] border-b border-black/10 pb-2">
-            <Zap className="w-4 h-4 text-[#CCFF00] fill-current" />
-            <span>TRAITS</span>
-          </div>
-          <ul className="flex flex-col gap-2 font-mono text-xs font-bold text-[#0B1F33]">
-            <li className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-[#88A000]" /> Creative
-            </li>
-            <li className="flex items-center gap-2">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#88A000]" /> Reliable
-            </li>
-            <li className="flex items-center gap-2">
-              <Target className="w-3.5 h-3.5 text-[#88A000]" /> Strategist
-            </li>
-            <li className="flex items-center gap-2">
-              <Hammer className="w-3.5 h-3.5 text-[#88A000]" /> Builder
-            </li>
-            <li className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-[#88A000]" /> Efficient
-            </li>
-          </ul>
-        </div>
-
-        {/* ── OVERLAY HEADLINE & ACTION BUTTONS ON TORSO ── */}
-        <div className="absolute inset-x-0 bottom-12 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
-          <h1
-            ref={h1Ref}
-            className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)] leading-[0.9] mb-6 pointer-events-auto"
+          {/* FLOATING RIGHT TRAITS GLASS LIST CARD */}
+          <motion.div
+            variants={rightCardVariants}
+            className="absolute right-0 sm:right-4 top-1/4 p-5 rounded-2xl bg-white/40 backdrop-blur-md border border-white/60 shadow-xl flex flex-col gap-3 z-20 hidden lg:flex w-48 pointer-events-auto"
           >
-            <div>Engineering,</div>
-            <div>Applied</div>
-            <div className="font-serif italic text-[#CCFF00] drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
-              Differently.
+            <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#0B1F33] border-b border-black/10 pb-2">
+              <Zap className="w-4 h-4 text-[#CCFF00] fill-current" />
+              <span>TRAITS</span>
             </div>
-          </h1>
+            <ul className="flex flex-col gap-2 font-mono text-xs font-bold text-[#0B1F33]">
+              <li className="flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#88A000]" /> Creative
+              </li>
+              <li className="flex items-center gap-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#88A000]" /> Reliable
+              </li>
+              <li className="flex items-center gap-2">
+                <Target className="w-3.5 h-3.5 text-[#88A000]" /> Strategist
+              </li>
+              <li className="flex items-center gap-2">
+                <Hammer className="w-3.5 h-3.5 text-[#88A000]" /> Builder
+              </li>
+              <li className="flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 text-[#88A000]" /> Efficient
+              </li>
+            </ul>
+          </motion.div>
 
-          {/* NEON YELLOW ACTION BUTTONS */}
-          <div
-            ref={ctaButtonsRef}
-            className="flex items-center justify-center gap-4 pointer-events-auto opacity-0"
-          >
-            <Magnetic>
-              <a
-                href={`mailto:${PROFILE.email}`}
-                className="px-8 py-3.5 bg-[#CCFF00] text-[#0B1F33] hover:bg-black hover:text-[#CCFF00] rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
-              >
-                Let's Talk
-              </a>
-            </Magnetic>
+          {/* OVERLAY HEADLINE & ACTION BUTTONS ON TORSO (z-30) */}
+          <div className="absolute inset-x-0 bottom-12 flex flex-col items-center justify-center text-center z-30 pointer-events-none">
+            <motion.h1
+              variants={headlineVariants}
+              className="font-heading font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tight text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)] leading-[0.9] mb-6 pointer-events-auto"
+            >
+              <div>Engineering,</div>
+              <div>Applied</div>
+              <div className="font-serif italic text-[#CCFF00] drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+                Differently.
+              </div>
+            </motion.h1>
 
-            <Magnetic>
-              <button
-                onClick={() => handleScrollTo("about")}
-                className="px-8 py-3.5 bg-[#CCFF00] text-[#0B1F33] hover:bg-black hover:text-[#CCFF00] rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
-              >
-                About Me
-              </button>
-            </Magnetic>
+            {/* NEON YELLOW ACTION BUTTONS */}
+            <motion.div
+              variants={ctaButtonVariants}
+              className="flex items-center justify-center gap-4 pointer-events-auto"
+            >
+              <Magnetic>
+                <a
+                  href={`mailto:${PROFILE.email}`}
+                  className="px-8 py-3.5 bg-[#CCFF00] text-[#0B1F33] hover:bg-black hover:text-[#CCFF00] rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
+                >
+                  Let's Talk
+                </a>
+              </Magnetic>
+
+              <Magnetic>
+                <button
+                  onClick={() => handleScrollTo("about")}
+                  className="px-8 py-3.5 bg-[#CCFF00] text-[#0B1F33] hover:bg-black hover:text-[#CCFF00] rounded-full text-xs font-bold font-mono tracking-wider uppercase transition-all duration-300 shadow-2xl cursor-pointer"
+                >
+                  About Me
+                </button>
+              </Magnetic>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* ── BOTTOM EDITORIAL FOOTER COPY ── */}
-      <div
-        ref={bottomCopyRef}
-        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10 opacity-0"
+      {/* ── PHASE 3: BOTTOM EDITORIAL FOOTER COPY (z-20) ── */}
+      <motion.div
+        variants={uiItemVariants}
+        className="w-full max-w-7xl mx-auto flex justify-between items-end z-20 pt-4 font-mono text-xs text-[#0B1F33]/80 leading-relaxed border-t border-black/10"
       >
         <div className="max-w-xs font-bold">
           <p className="text-[#0B1F33] font-heading text-sm font-bold">
@@ -330,10 +359,10 @@ export const Hero: React.FC = () => {
             {HERO_COPY.intro}
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Bottom Center Handle Pill (as seen in hey.mp4 frame 00:00) */}
+      {/* Bottom Center Handle Pill */}
       <div className="w-12 h-1.5 bg-[#0B1F33]/20 rounded-full mx-auto mt-2" />
-    </section>
+    </motion.section>
   );
 };
