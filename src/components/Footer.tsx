@@ -1,33 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useAppStore } from "@/lib/store";
 import { PROFILE } from "@/lib/data";
 import { EmailPill } from "@/components/EmailPill";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Inline Brand Icons for the footer
+gsap.registerPlugin(ScrollTrigger);
+
 const GithubIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
     <path d="M9 18c-4.51 2-5-2-7-2" />
   </svg>
 );
 
 const LinkedinIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
     <rect width="4" height="12" x="2" y="9" />
     <circle cx="4" cy="4" r="2" />
@@ -35,15 +23,7 @@ const LinkedinIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 const InstagramIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
@@ -51,6 +31,9 @@ const InstagramIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 export const Footer: React.FC = () => {
+  const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const footerRef = useRef<HTMLElement>(null);
+  const lettersRef = useRef<(HTMLSpanElement | null)[]>([]);
   const [time, setTime] = useState("");
 
   // Live IST Clock
@@ -71,8 +54,40 @@ export const Footer: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // GIANT RUBAHAN LETTER ROLL-UP ANIMATION
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer || reducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        lettersRef.current,
+        { yPercent: 125, opacity: 0 },
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 1.0,
+          stagger: 0.07,
+          ease: "back.out(1.4)",
+          scrollTrigger: {
+            trigger: footer,
+            start: "bottom 95%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    }, footerRef);
+
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
+  const nameChars = "RUBAHAN".split("");
+
   return (
-    <footer className="w-full bg-canvas border-t border-mist/10 pt-20 select-none z-10 relative">
+    <footer
+      ref={footerRef}
+      className="w-full bg-canvas border-t border-mist/10 pt-20 select-none z-10 relative overflow-hidden"
+    >
       <div className="max-w-4xl mx-auto px-6 md:pl-72 md:pr-12">
         {/* Row 1: Contacts & Links */}
         <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-6 pb-12">
@@ -136,9 +151,18 @@ export const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Giant Monogram Title in footer */}
-      <div className="w-full text-center overflow-hidden font-heading font-bold text-[15vw] leading-none text-sky/15 uppercase tracking-tighter pointer-events-none mt-10">
-        RUBAHAN
+      {/* Giant Monogram Title in footer (Letter Roll-Up) */}
+      <div className="w-full text-center overflow-hidden font-heading font-bold text-[15vw] leading-none text-sky/15 uppercase tracking-tighter pointer-events-none mt-10 flex justify-center items-center select-none">
+        {nameChars.map((char, idx) => (
+          <span key={idx} className="inline-block overflow-hidden py-2">
+            <span
+              ref={(el) => { lettersRef.current[idx] = el; }}
+              className="inline-block will-change-transform"
+            >
+              {char}
+            </span>
+          </span>
+        ))}
       </div>
     </footer>
   );

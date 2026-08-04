@@ -1,14 +1,16 @@
 import React, { useEffect, useRef } from "react";
-import { useAppStore } from "@/lib/store";
-import { useActiveSection } from "@/hooks/useActiveSection";
-import { SERVICES } from "@/lib/site-copy";
+import { SERVICES, CTA_COPY } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
 import { SectionHeading } from "@/components/SectionHeading";
 import { Magnetic } from "@/components/Magnetic";
+import { useActiveSection } from "@/hooks/useActiveSection";
+import { useAppStore } from "@/lib/store";
+import { Check, Mail } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export const Services: React.FC = () => {
   useActiveSection("services");
@@ -16,32 +18,66 @@ export const Services: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const ctaBandRef = useRef<HTMLDivElement>(null);
+  const ctaTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // Services stagger load trigger
   useEffect(() => {
     if (reducedMotion) return;
 
-    const anim = gsap.fromTo(
-      cardsRef.current,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 78%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
+    const ctx = gsap.context(() => {
+      // 1. CONVERGENT CARDS ANIMATION (left from bottom-left, middle from bottom, right from bottom-right)
+      cardsRef.current.forEach((card, idx) => {
+        if (!card) return;
 
-    return () => {
-      anim.kill();
-      if (anim.scrollTrigger) anim.scrollTrigger.kill();
-    };
+        let initialX = 0;
+        if (idx === 0) initialX = -80;
+        if (idx === 2) initialX = 80;
+
+        gsap.fromTo(
+          card,
+          { x: initialX, y: 80, opacity: 0 },
+          {
+            x: 0,
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            delay: idx * 0.1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      });
+
+      // 2. CTA BAND UNMASK
+      if (ctaTitleRef.current) {
+        const split = new SplitText(ctaTitleRef.current, {
+          type: "lines,words",
+          linesClass: "line-mask",
+        });
+
+        gsap.fromTo(
+          split.words,
+          { yPercent: 110 },
+          {
+            yPercent: 0,
+            duration: 0.8,
+            stagger: 0.04,
+            ease: "power4.out",
+            scrollTrigger: {
+              trigger: ctaBandRef.current,
+              start: "top 80%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+    }, containerRef);
+
+    return () => ctx.revert();
   }, [reducedMotion]);
 
   return (
@@ -53,82 +89,92 @@ export const Services: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <SectionHeading eyebrow="Services" title="Solutions That Deliver" />
         <p className="text-mist font-mono text-xs md:text-sm mt-4 mb-16 max-w-xl">
-          Clean engineering packages scoped to save time, ship fast, and integrate cleanly.
+          Focused engineering offers with zero fluff — built for teams, clubs, and projects that need results.
         </p>
 
-        {/* Services Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
-          {SERVICES.map((service, idx) => (
-            <div
-              key={idx}
-              ref={(el) => { cardsRef.current[idx] = el; }}
-              className="bg-surface border border-mist/20 rounded-2xl p-6 md:p-8 flex flex-col justify-between hover:-translate-y-2 hover:border-sky/50 hover:shadow-lg hover:shadow-sky/5 transition-all duration-300 relative z-10"
-            >
-              <div>
-                <div className="flex justify-between items-center gap-4 mb-6">
-                  <h3 className="font-heading text-lg font-bold text-ink leading-tight">
+        {/* 3 Convergent Services Decks */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+          {SERVICES.map((service, idx) => {
+            const isFree = service.price === "Free";
+
+            return (
+              <div
+                key={idx}
+                ref={(el) => { cardsRef.current[idx] = el; }}
+                className="group relative p-6 md:p-8 rounded-2xl bg-surface border border-mist/20 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:border-sky/50 transition-all duration-300 flex flex-col justify-between h-full cursor-pointer will-change-transform"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <span className="font-mono text-xs font-bold text-sky">
+                      0{idx + 1}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full font-mono text-[10px] font-bold border ${
+                        isFree
+                          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
+                          : "bg-sky/10 text-deep border-sky/30"
+                      }`}
+                    >
+                      {service.price}
+                    </span>
+                  </div>
+
+                  <h3 className="font-heading text-xl font-bold text-ink mb-4 group-hover:text-sky transition-colors duration-300">
                     {service.title}
                   </h3>
-                  <span className="px-2.5 py-0.5 bg-sky/10 border border-sky/35 rounded-full text-deep text-[10px] font-mono font-bold shrink-0">
-                    {service.price}
-                  </span>
+
+                  <ul className="flex flex-col gap-2.5 mb-6">
+                    {service.bullets.map((bullet, bIdx) => (
+                      <li key={bIdx} className="flex items-start gap-2.5 text-xs text-mist leading-relaxed font-medium">
+                        <Check className="w-3.5 h-3.5 text-sky shrink-0 mt-0.5" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                <ul className="flex flex-col gap-3 mb-8">
-                  {service.bullets.map((bullet, i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-xs text-mist font-medium leading-relaxed">
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-3.5 h-3.5 text-deep shrink-0 mt-0.5"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      <span>{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <div>
+                  <p className="text-[11px] font-serif italic text-mist mb-6 border-t border-mist/10 pt-4">
+                    {service.audience}
+                  </p>
 
-              <div>
-                <p className="text-[10px] text-mist/85 italic mb-6 border-t border-mist/10 pt-4 font-mono leading-relaxed">
-                  {service.audience}
-                </p>
-
-                <a
-                  href={`mailto:${PROFILE.email}?subject=Interested in ${service.title}`}
-                  className="w-full flex items-center justify-center py-2.5 bg-canvas border border-mist/25 hover:border-deep hover:bg-sky text-ink rounded-full text-xs font-bold transition-all duration-300 text-center cursor-pointer shadow-sm hover:scale-[1.02]"
-                >
-                  Get Started
-                </a>
+                  <a
+                    href={`mailto:${PROFILE.email}`}
+                    className="w-full py-2.5 px-4 bg-canvas hover:bg-sky hover:text-ink border border-mist/20 rounded-full text-xs font-semibold font-mono text-ink text-center flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Get in Touch</span>
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* ── CTA BAND ── */}
-        <div className="w-full bg-[#0B1F33] text-white rounded-3xl p-12 md:p-16 flex flex-col items-center justify-center gap-8 mt-24 shadow-2xl relative overflow-hidden">
-          {/* Subtle overlay glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-sky)/10_0%,transparent_60%)] pointer-events-none" />
+        {/* Full-width CTA Band with Isolated Amber Hover Moment */}
+        <div
+          ref={ctaBandRef}
+          className="w-full bg-[#0B1F33] text-surface rounded-3xl p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl overflow-hidden relative"
+        >
+          <div className="max-w-md text-center md:text-left">
+            <span className="font-mono text-xs uppercase tracking-widest text-mist mb-2 block">
+              Get In Touch
+            </span>
+            <h3
+              ref={ctaTitleRef}
+              className="font-heading text-3xl md:text-5xl font-bold text-white leading-tight will-change-transform"
+            >
+              {CTA_COPY.line}
+            </h3>
+          </div>
 
-          <span className="font-mono text-[10px] uppercase tracking-widest text-sky font-bold z-10">
-            HAVE SOMETHING IN MIND?
-          </span>
-          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-center tracking-tight leading-none max-w-xl z-10">
-            Let's build something that performs.
-          </h2>
-
-          <div className="mt-4 z-10">
+          <div className="shrink-0">
             <Magnetic>
               <a
                 href={`mailto:${PROFILE.email}`}
-                className="px-10 py-4.5 bg-sky text-[#0B1F33] hover:bg-[#FFB86B] hover:text-[#0B1F33] rounded-full text-base font-bold transition-all duration-300 shadow-xl cursor-pointer block text-center min-w-[180px] hover:scale-105"
+                className="px-10 py-5 bg-sky text-ink font-heading font-bold text-lg md:text-xl rounded-full transition-colors duration-300 shadow-xl cursor-pointer block hover:bg-[#FFB86B] hover:text-ink"
               >
-                Let's Talk
+                {CTA_COPY.button}
               </a>
             </Magnetic>
           </div>

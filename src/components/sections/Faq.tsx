@@ -1,21 +1,58 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useAppStore } from "@/lib/store";
 import { FAQ_ITEMS } from "@/lib/site-copy";
 import { PROFILE } from "@/lib/data";
 import { SectionHeading } from "@/components/SectionHeading";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const Faq: React.FC = () => {
   useActiveSection("faq");
+  const reducedMotion = useAppStore((s) => s.reducedMotion);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
   const [openIdx, setOpenIdx] = useState<number | null>(null);
 
   const toggleAccordion = (idx: number) => {
     setOpenIdx(openIdx === idx ? null : idx);
   };
 
+  // STAGGER ENTRANCE FOR FAQ ITEMS
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || reducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      const items = Array.from(list.children) as HTMLElement[];
+      gsap.fromTo(
+        items,
+        { y: 40, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.7,
+          stagger: 0.08,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 78%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
   return (
     <section
       id="faq"
+      ref={containerRef}
       className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10"
     >
       <div className="max-w-3xl mx-auto">
@@ -25,7 +62,7 @@ export const Faq: React.FC = () => {
         </p>
 
         {/* Accordion List */}
-        <div className="flex flex-col border-t border-mist/20">
+        <div ref={listRef} className="flex flex-col border-t border-mist/20">
           {FAQ_ITEMS.map((item, idx) => {
             const isOpen = openIdx === idx;
             const isLast = idx === FAQ_ITEMS.length - 1;
@@ -47,7 +84,6 @@ export const Faq: React.FC = () => {
   );
 };
 
-/* Subcomponent with GSAP driven grid-template-rows transition */
 interface AccordionItemProps {
   isOpen: boolean;
   question: string;
@@ -76,7 +112,6 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
 
   const renderAnswerText = () => {
     if (isLastItem) {
-      // Inject mailto link for last item dynamically
       return (
         <span>
           No stress. Email me at{" "}
@@ -94,7 +129,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
   };
 
   return (
-    <div className="border-b border-mist/10">
+    <div className="border-b border-mist/10 will-change-transform">
       <button
         onClick={onToggle}
         className="w-full py-6 flex items-center justify-between gap-6 text-left focus:outline-none group cursor-pointer"
@@ -104,7 +139,6 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
           {question}
         </span>
 
-        {/* Plus / X icon overlay */}
         <div className="w-8 h-8 rounded-full border border-mist/20 group-hover:border-deep group-hover:bg-sky/10 flex items-center justify-center text-mist group-hover:text-deep transition-all duration-300 shrink-0">
           <svg
             viewBox="0 0 24 24"
@@ -123,7 +157,6 @@ const AccordionItem: React.FC<AccordionItemProps> = ({
         </div>
       </button>
 
-      {/* Expandable row area */}
       <div
         ref={gridRef}
         className="grid transition-all duration-300 ease-out"

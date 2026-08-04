@@ -6,12 +6,16 @@ import { TESTIMONIALS } from "@/lib/site-copy";
 import { SectionHeading } from "@/components/SectionHeading";
 import { useDrag } from "@use-gesture/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export const Recognition: React.FC = () => {
-  useActiveSection("what-you-get"); // Highlight 'What You Get' area since Recognition is a subsegment of it or adjacent
+  useActiveSection("what-you-get");
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setCursorLabel = useAppStore((s) => s.setCursorLabel);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -25,13 +29,12 @@ export const Recognition: React.FC = () => {
     return firstChild ? firstChild.offsetWidth : 0;
   };
 
-  // Helper to snap to target slide index
   const snapTo = (index: number) => {
     const el = carouselRef.current;
     if (!el) return;
     const width = getCardWidth();
     gsap.to(el, {
-      x: -index * (width + 24), // card width + gap-6
+      x: -index * (width + 24),
       duration: 0.5,
       ease: "power2.out",
     });
@@ -41,7 +44,6 @@ export const Recognition: React.FC = () => {
     snapTo(currentIndex);
   }, [currentIndex]);
 
-  // Recalibrate on resize
   useEffect(() => {
     const handleResize = () => {
       snapTo(currentIndex);
@@ -50,7 +52,34 @@ export const Recognition: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [currentIndex]);
 
-  // Click to advance handler
+  // STAGGER ENTRANCE SLIDE FROM RIGHT ON SCROLL
+  useEffect(() => {
+    const track = carouselRef.current;
+    if (!track || reducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      const cards = Array.from(track.children) as HTMLElement[];
+      gsap.fromTo(
+        cards,
+        { x: 150, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.12,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 78%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
   const handleCardClick = (idx: number) => {
     if (idx === currentIndex) {
       setCurrentIndex((prev) => (prev + 1) % cardsCount);
@@ -59,7 +88,6 @@ export const Recognition: React.FC = () => {
     }
   };
 
-  // Bind drag gesture
   const bind = useDrag(
     ({ active, movement: [mx], velocity: [vx] }) => {
       if (reducedMotion || !carouselRef.current) return;
@@ -72,7 +100,6 @@ export const Recognition: React.FC = () => {
         });
       } else {
         const threshold = step / 3.5;
-        // Swipe forward or backward
         if (mx < -threshold || (mx < -20 && vx > 0.4)) {
           if (currentIndex < cardsCount - 1) {
             setCurrentIndex((prev) => prev + 1);
@@ -94,7 +121,10 @@ export const Recognition: React.FC = () => {
   );
 
   return (
-    <section className="relative w-full bg-canvas py-20 px-6 md:pl-72 md:pr-12 select-none z-10 overflow-hidden">
+    <section
+      ref={containerRef}
+      className="relative w-full bg-canvas py-20 px-6 md:pl-72 md:pr-12 select-none z-10 overflow-hidden"
+    >
       <div className="max-w-4xl mx-auto">
         <SectionHeading eyebrow="Recognition" title="Leadership &Symposiums" />
         <p className="text-mist font-mono text-xs md:text-sm mt-4 mb-16 max-w-xl">
@@ -111,7 +141,7 @@ export const Recognition: React.FC = () => {
           <div
             {...bind()}
             ref={carouselRef}
-            className="flex gap-6 w-max select-none"
+            className="flex gap-6 w-max select-none will-change-transform"
             style={{ touchAction: "pan-y" }}
           >
             {carouselData.map((item, idx) => {
@@ -124,13 +154,12 @@ export const Recognition: React.FC = () => {
                   onClick={() => handleCardClick(idx)}
                   onMouseEnter={() => setCursorLabel("click")}
                   onMouseLeave={() => setCursorLabel("drag")}
-                  className={`w-[84vw] sm:w-[480px] md:w-[580px] p-6 md:p-8 rounded-2xl bg-surface border border-mist/20 shadow-sm text-left transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-deep/50 block cursor-pointer select-none ${
+                  className={`w-[84vw] sm:w-[480px] md:w-[580px] p-6 md:p-8 rounded-2xl bg-surface border border-mist/20 shadow-sm text-left transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-deep/50 block cursor-pointer select-none will-change-transform ${
                     isActive ? "opacity-100 scale-100" : "opacity-40 scale-95"
                   }`}
                   style={{ userSelect: "none" }}
                 >
                   {isTestimonial ? (
-                    /* Testimonial Mode */
                     <div className="flex flex-col justify-between h-full min-h-[160px]">
                       <p className="font-heading text-lg md:text-xl font-medium text-ink italic leading-relaxed mb-6">
                         “{(item as any).quote}”
@@ -157,7 +186,6 @@ export const Recognition: React.FC = () => {
                       </div>
                     </div>
                   ) : (
-                    /* Leadership Mode */
                     <div className="flex flex-col justify-between h-full min-h-[160px]">
                       <div>
                         <div className="flex items-start justify-between gap-4 mb-3">

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { useActiveSection } from "@/hooks/useActiveSection";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { PROJECTS } from "@/lib/data";
 import { WORK_OUTCOMES } from "@/lib/site-copy";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -13,95 +14,118 @@ export const Projects: React.FC = () => {
   useActiveSection("projects");
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const setCursorLabel = useAppStore((s) => s.setCursorLabel);
+  const isDesktop = useMediaQuery("(min-width: 769px)");
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const rowsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  const revealRef = useRef<HTMLDivElement>(null);
-
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // Handle active project click
   const handleActivateProject = (githubUrl: string) => {
     window.open(githubUrl, "_blank", "noopener,noreferrer");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, githubUrl: string) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      handleActivateProject(githubUrl);
-    }
-  };
-
-  // Mouse move listener to track local coordinates inside the container
+  // DESKTOP: PINNED HORIZONTAL GALLERY (300vh pin distance)
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track || reducedMotion || !isDesktop) return;
+
+    const ctx = gsap.context(() => {
+      // Calculate total horizontal scroll distance
+      const totalScrollWidth = track.scrollWidth - window.innerWidth + 300;
+
+      // 1. PIN & HORIZONTAL TRACK TRANSLATION
+      const pinTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: `+=${totalScrollWidth}`,
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.8,
+          onRefresh: () => {
+            ScrollTrigger.update();
+          },
+        },
       });
-    };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+      pinTimeline.to(track, {
+        x: -totalScrollWidth,
+        ease: "none",
+      });
 
-  // BACKGROUND THEME LERPING ON ENTER & LEAVE (ScrollTrigger)
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || reducedMotion) return;
+      // 2. BACKGROUND THEME LERPING ON PIN (#F6FAFD <-> #0B1F33)
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 40%",
+        end: `+=${totalScrollWidth + window.innerHeight * 0.5}`,
+        onEnter: () => {
+          gsap.to(document.documentElement, {
+            "--color-canvas": "#0B1F33",
+            "--color-surface": "#0C233B",
+            "--color-ink": "#FFFFFF",
+            "--color-mist": "#8FB3C7",
+            duration: 0.6,
+            ease: "power2.out",
+          });
+        },
+        onLeave: () => {
+          gsap.to(document.documentElement, {
+            "--color-canvas": "#F6FAFD",
+            "--color-surface": "#FFFFFF",
+            "--color-ink": "#0B1F33",
+            "--color-mist": "#8FB3C7",
+            duration: 0.6,
+            ease: "power2.out",
+          });
+        },
+        onEnterBack: () => {
+          gsap.to(document.documentElement, {
+            "--color-canvas": "#0B1F33",
+            "--color-surface": "#0C233B",
+            "--color-ink": "#FFFFFF",
+            "--color-mist": "#8FB3C7",
+            duration: 0.6,
+            ease: "power2.out",
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(document.documentElement, {
+            "--color-canvas": "#F6FAFD",
+            "--color-surface": "#FFFFFF",
+            "--color-ink": "#0B1F33",
+            "--color-mist": "#8FB3C7",
+            duration: 0.6,
+            ease: "power2.out",
+          });
+        },
+      });
 
-    const trigger = ScrollTrigger.create({
-      trigger: container,
-      start: "top 50%",
-      end: "bottom 50%",
-      onEnter: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#0B1F33",
-          "--color-surface": "#0C233B",
-          "--color-ink": "#FFFFFF",
-          "--color-mist": "#8FB3C7",
-          duration: 0.55,
-          ease: "power2.out",
-        });
-      },
-      onLeave: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#F6FAFD",
-          "--color-surface": "#FFFFFF",
-          "--color-ink": "#0B1F33",
-          "--color-mist": "#8FB3C7",
-          duration: 0.55,
-          ease: "power2.out",
-        });
-      },
-      onEnterBack: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#0B1F33",
-          "--color-surface": "#0C233B",
-          "--color-ink": "#FFFFFF",
-          "--color-mist": "#8FB3C7",
-          duration: 0.55,
-          ease: "power2.out",
-        });
-      },
-      onLeaveBack: () => {
-        gsap.to(document.documentElement, {
-          "--color-canvas": "#F6FAFD",
-          "--color-surface": "#FFFFFF",
-          "--color-ink": "#0B1F33",
-          "--color-mist": "#8FB3C7",
-          duration: 0.55,
-          ease: "power2.out",
-        });
-      },
-    });
+      // 3. CARD CENTER CROSS SCALE & PARALLAX EFFECT
+      cardsRef.current.forEach((card) => {
+        if (!card) return;
+        gsap.fromTo(
+          card,
+          { scale: 0.92, rotateY: -3 },
+          {
+            scale: 1.02,
+            rotateY: 0,
+            ease: "power1.out",
+            scrollTrigger: {
+              trigger: card,
+              containerAnimation: pinTimeline,
+              start: "left 85%",
+              end: "center center",
+              scrub: true,
+            },
+          }
+        );
+      });
+    }, sectionRef);
 
     return () => {
-      trigger.kill();
-      // Reset variables on component unmount
+      ctx.revert();
       gsap.to(document.documentElement, {
         "--color-canvas": "#F6FAFD",
         "--color-surface": "#FFFFFF",
@@ -110,168 +134,181 @@ export const Projects: React.FC = () => {
         duration: 0.1,
       });
     };
-  }, [reducedMotion]);
-
-  // STAGGERED ROW ENTRANCE REVEAL ON SCROLL
-  useEffect(() => {
-    if (reducedMotion) return;
-
-    const anim = gsap.fromTo(
-      rowsRef.current,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.12,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 78%",
-          toggleActions: "play none none none",
-        },
-      }
-    );
-
-    return () => {
-      anim.kill();
-      if (anim.scrollTrigger) anim.scrollTrigger.kill();
-    };
-  }, [reducedMotion]);
-
-  // FLOATING PANEL SCALE & POSITION TELEMETRY
-  useEffect(() => {
-    const el = revealRef.current;
-    if (!el || reducedMotion) return;
-
-    if (hoveredIdx !== null) {
-      gsap.to(el, {
-        opacity: 1,
-        scale: 1,
-        x: mousePos.x + 25,
-        y: mousePos.y - 100,
-        duration: 0.35,
-        ease: "power2.out",
-        overwrite: "auto",
-      });
-    } else {
-      gsap.to(el, {
-        opacity: 0,
-        scale: 0.75,
-        duration: 0.25,
-        ease: "power2.inOut",
-        overwrite: "auto",
-      });
-    }
-  }, [mousePos, hoveredIdx, reducedMotion]);
-
-  const hoveredProject = hoveredIdx !== null ? PROJECTS[hoveredIdx] : null;
+  }, [reducedMotion, isDesktop]);
 
   return (
     <section
       id="projects"
-      ref={containerRef}
-      className="relative min-h-screen w-full bg-canvas py-28 px-6 md:pl-72 md:pr-12 select-none z-10 transition-colors duration-300 overflow-hidden"
+      ref={sectionRef}
+      className={`relative w-full bg-canvas select-none z-10 transition-colors duration-300 overflow-hidden ${
+        isDesktop ? "h-screen py-12 flex flex-col justify-between" : "py-24 px-6"
+      }`}
     >
-      {/* Dynamic Cursor tracking panel */}
-      <div
-        ref={revealRef}
-        className="absolute pointer-events-none z-30 w-60 h-40 rounded-xl overflow-hidden shadow-2xl opacity-0 scale-75 border border-white/10 hidden md:flex flex-col justify-between p-5 transition-colors duration-300"
-        style={{
-          backgroundColor: hoveredProject ? hoveredProject.accent : "transparent",
-          top: 0,
-          left: 0,
-        }}
-      >
-        <span className="text-white/60 font-mono text-[9px] uppercase tracking-widest font-semibold">
-          {hoveredProject?.domain}
-        </span>
-        <span className="text-white font-heading font-bold text-lg leading-snug">
-          {hoveredProject?.title}
-        </span>
-      </div>
-
-      <div className="max-w-4xl mx-auto">
+      {/* Top Header - Fixed/Pinned inside Section */}
+      <div className="w-full max-w-7xl mx-auto px-6 md:pl-72 md:pr-12 pt-4">
         <SectionHeading eyebrow="Selected Work" title="Built to Perform" />
-        <p className="text-mist font-mono text-xs md:text-sm mt-4 mb-16 max-w-xl">
+        <p className="text-mist font-mono text-xs md:text-sm mt-3 max-w-xl">
           AI, web, and silicon combined — turning real problems into systems that ship, perform, and keep working.
         </p>
+      </div>
 
-        {/* Project rows list */}
-        <div className="flex flex-col border-t border-mist/20">
-          {PROJECTS.map((project, idx) => {
+      {/* DESKTOP PINNED HORIZONTAL GALLERY TRACK */}
+      {isDesktop ? (
+        <div className="w-full overflow-hidden my-auto py-6">
+          <div
+            ref={trackRef}
+            className="flex gap-8 pl-72 pr-24 w-max items-center will-change-transform"
+          >
+            {PROJECTS.map((project, idx) => {
+              const outcomeInfo = WORK_OUTCOMES.find((o) => o.id === project.id);
+              const chips = outcomeInfo ? outcomeInfo.chips : project.stack.slice(0, 3);
+              const outcome = outcomeInfo ? outcomeInfo.outcome : project.tagline;
+
+              return (
+                <div
+                  key={project.id}
+                  ref={(el) => { cardsRef.current[idx] = el; }}
+                  onClick={() => handleActivateProject(project.github)}
+                  onMouseEnter={() => {
+                    setHoveredIdx(idx);
+                    setCursorLabel("open");
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredIdx(null);
+                    setCursorLabel("");
+                  }}
+                  className={`w-[480px] lg:w-[540px] h-[400px] p-8 bg-surface rounded-2xl border border-mist/20 shadow-xl flex flex-col justify-between transition-all duration-300 group cursor-pointer relative overflow-hidden will-change-transform ${
+                    hoveredIdx !== null && hoveredIdx !== idx
+                      ? "opacity-40 scale-95"
+                      : "opacity-100 scale-100"
+                  }`}
+                  style={{
+                    borderTop: `4px solid ${project.accent}`,
+                  }}
+                >
+                  {/* Top Bar: Index & Tech Chips */}
+                  <div>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                      <span className="px-3 py-1 bg-sky/10 text-sky text-xs font-mono font-bold rounded-full border border-sky/20">
+                        {project.index}
+                      </span>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-mist">
+                        {project.domain} · {project.year}
+                      </span>
+                    </div>
+
+                    <h3 className="font-heading text-2xl font-bold text-ink leading-snug group-hover:text-sky transition-colors duration-300 mb-2">
+                      {project.title}
+                    </h3>
+                    <p className="text-xs md:text-sm text-mist font-medium leading-relaxed">
+                      {outcome}
+                    </p>
+                  </div>
+
+                  {/* Impact grid */}
+                  <div className="grid grid-cols-3 gap-3 border-y border-mist/15 py-4 my-2">
+                    {project.impact.slice(0, 3).map((imp, i) => (
+                      <div key={i} className="flex flex-col">
+                        <span className="font-heading text-base font-bold text-ink">
+                          {imp.value}
+                        </span>
+                        <span className="text-[9px] font-mono text-mist leading-tight">
+                          {imp.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Bottom Bar: Stack & Action */}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {chips.slice(0, 3).map((chip, i) => (
+                        <span
+                          key={i}
+                          className="px-2.5 py-0.5 border border-mist/20 text-mist text-[9px] font-mono rounded-full"
+                        >
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-1 text-sky font-mono text-xs font-semibold group-hover:translate-x-1 transition-transform">
+                      <span>GitHub</span>
+                      <span>↗</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        /* MOBILE HORIZONTAL SCROLL-SNAP SWIPER (≤768px) */
+        <div className="w-full overflow-x-auto snap-x snap-mandatory flex gap-5 py-6 mt-6 px-4 no-scrollbar">
+          {PROJECTS.map((project) => {
             const outcomeInfo = WORK_OUTCOMES.find((o) => o.id === project.id);
             const chips = outcomeInfo ? outcomeInfo.chips : project.stack.slice(0, 3);
             const outcome = outcomeInfo ? outcomeInfo.outcome : project.tagline;
 
             return (
-              <button
+              <div
                 key={project.id}
-                ref={(el) => { rowsRef.current[idx] = el; }}
                 onClick={() => handleActivateProject(project.github)}
-                onKeyDown={(e) => handleKeyDown(e, project.github)}
-                onMouseEnter={() => {
-                  setHoveredIdx(idx);
-                  setCursorLabel("open");
-                }}
-                onMouseLeave={() => {
-                  setHoveredIdx(null);
-                  setCursorLabel("");
-                }}
-                className={`w-full text-left py-6 md:py-8 border-b border-mist/20 focus:outline-none focus:bg-surface/5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 relative group cursor-pointer ${
-                  hoveredIdx !== null && hoveredIdx !== idx ? "opacity-30" : "opacity-100"
-                }`}
-                aria-label={`Open ${project.title} on GitHub. Outcome: ${outcome}`}
+                className="w-[85vw] max-w-[340px] shrink-0 snap-center p-6 bg-surface rounded-2xl border border-mist/20 shadow-md flex flex-col justify-between min-h-[360px] active:scale-95 transition-transform"
+                style={{ borderTop: `4px solid ${project.accent}` }}
               >
-                {/* Number and Tech chips */}
-                <div className="flex items-center gap-4 md:gap-5 flex-wrap md:flex-nowrap">
-                  <span className="px-2.5 py-0.5 bg-sky/10 text-sky text-[10px] font-mono font-bold rounded-full border border-sky/20">
-                    {project.index}
-                  </span>
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="px-2.5 py-0.5 bg-sky/10 text-sky text-[10px] font-mono font-bold rounded-full">
+                      {project.index}
+                    </span>
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-mist">
+                      {project.domain}
+                    </span>
+                  </div>
 
-                  <div className="flex items-center gap-1.5">
-                    {chips.slice(0, 3).map((chip, i) => (
+                  <h3 className="font-heading text-xl font-bold text-ink mb-2">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs text-mist leading-relaxed font-medium">
+                    {outcome}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 border-y border-mist/15 py-3 my-3">
+                  {project.impact.slice(0, 3).map((imp, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="font-heading text-sm font-bold text-ink">
+                        {imp.value}
+                      </span>
+                      <span className="text-[8px] font-mono text-mist leading-tight">
+                        {imp.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {chips.slice(0, 2).map((chip, i) => (
                       <span
                         key={i}
-                        className="px-2 py-0.5 border border-mist/20 text-mist text-[9px] font-mono rounded-full whitespace-nowrap"
+                        className="px-2 py-0.5 border border-mist/20 text-mist text-[8px] font-mono rounded-full"
                       >
                         {chip}
                       </span>
                     ))}
                   </div>
-                </div>
 
-                {/* Title and Outcome */}
-                <div className="flex-1 min-w-0 md:pl-6">
-                  <h3 className="font-heading text-lg md:text-xl font-bold text-ink leading-snug group-hover:text-sky transition-colors duration-300">
-                    {project.title}
-                  </h3>
-                  <p className="text-xs md:text-sm text-mist font-medium leading-relaxed mt-1">
-                    {outcome}
-                  </p>
+                  <span className="text-sky font-mono text-xs font-semibold">
+                    GitHub ↗
+                  </span>
                 </div>
-
-                {/* Action arrow */}
-                <div className="flex items-center gap-2 self-start md:self-auto text-deep group-hover:text-sky transition-colors duration-300 mt-1 md:mt-0 font-mono text-xs font-semibold">
-                  <span>Github</span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300"
-                  >
-                    <line x1="7" y1="17" x2="17" y2="7" />
-                    <polyline points="7 7 17 7 17 17" />
-                  </svg>
-                </div>
-              </button>
+              </div>
             );
           })}
         </div>
-      </div>
+      )}
     </section>
   );
 };

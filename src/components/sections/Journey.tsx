@@ -15,7 +15,8 @@ export const Journey: React.FC = () => {
   const pathRef = useRef<SVGPathElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const yearsRef = useRef<(HTMLDivElement | null)[]>([]);
-  
+  const footersRef = useRef<(HTMLDivElement | null)[]>([]);
+
   const [expandedCardIndex, setExpandedCardIndex] = useState<number | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
@@ -23,7 +24,6 @@ export const Journey: React.FC = () => {
     setImageErrors((prev) => ({ ...prev, [idx]: true }));
   };
 
-  // Keyboard operations & Close on Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -34,13 +34,12 @@ export const Journey: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // SNAKING SVG PATH DRAW-IN ON SCROLL
+  // 1. SNAKING SVG PATH DRAW-IN ON SCROLL
   useEffect(() => {
     const path = pathRef.current;
     const container = containerRef.current;
     if (!path || !container || reducedMotion) return;
 
-    // Get total length of path
     const length = path.getTotalLength();
     gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
 
@@ -51,75 +50,91 @@ export const Journey: React.FC = () => {
         trigger: container,
         start: "top 70%",
         end: "bottom 80%",
-        scrub: true,
+        scrub: 0.8,
       },
     });
 
     return () => {
       anim.kill();
-      if (anim.scrollTrigger) {
-        anim.scrollTrigger.kill();
-      }
+      if (anim.scrollTrigger) anim.scrollTrigger.kill();
     };
   }, [reducedMotion]);
 
-  // PARALLAX STAGGERED CARDS ON SCROLL ENTER + HORIZONTAL YEAR SCRUB-SLIDE
+  // 2. SCRUBBED ZIGZAG CARDS + CRISS-CROSS YEARS + FOOTER POPS
   useEffect(() => {
     if (reducedMotion) return;
 
-    // 1. Staggered card parallax reveal
-    const cardScrollTriggers = cardsRef.current.map((card) => {
-      if (!card) return null;
-      return gsap.fromTo(
-        card,
-        { opacity: 0, y: 80 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: card,
-            start: "top 88%",
-            toggleActions: "play none none none",
-          },
-        }
-      );
-    });
+    const ctx = gsap.context(() => {
+      JOURNEY_CARDS.forEach((_, idx) => {
+        const card = cardsRef.current[idx];
+        const year = yearsRef.current[idx];
+        const footer = footersRef.current[idx];
+        if (!card) return;
 
-    // 2. Year scrub slide
-    const yearScrollTriggers = yearsRef.current.map((year, idx) => {
-      const card = cardsRef.current[idx];
-      if (!year || !card) return null;
-      return gsap.fromTo(
-        year,
-        { x: idx % 2 === 0 ? -40 : 40 },
-        {
-          x: idx % 2 === 0 ? 60 : -60,
-          scrollTrigger: {
-            trigger: card,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        }
-      );
-    });
+        const isOdd = idx % 2 === 0;
+        const initialX = isOdd ? -120 : 120;
+        const initialRot = isOdd ? -4 : 4;
+        const yearInitialX = isOdd ? 120 : -120;
 
-    return () => {
-      cardScrollTriggers.forEach((t) => {
-        if (t) {
-          t.kill();
-          if (t.scrollTrigger) t.scrollTrigger.kill();
+        // Card Zigzag entrance
+        gsap.fromTo(
+          card,
+          { x: initialX, rotate: initialRot, opacity: 0 },
+          {
+            x: 0,
+            rotate: 0,
+            opacity: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 88%",
+              end: "top 55%",
+              scrub: 0.8,
+            },
+          }
+        );
+
+        // Criss-Cross Year Numeral (opposite horizontal movement)
+        if (year) {
+          gsap.fromTo(
+            year,
+            { x: yearInitialX, opacity: 0.1 },
+            {
+              x: isOdd ? -40 : 40,
+              opacity: 0.35,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 95%",
+                end: "bottom 30%",
+                scrub: 0.8,
+              },
+            }
+          );
+        }
+
+        // Footer pop slightly delayed
+        if (footer) {
+          gsap.fromTo(
+            footer,
+            { scale: 0.85, opacity: 0 },
+            {
+              scale: 1,
+              opacity: 1,
+              ease: "back.out(1.5)",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 70%",
+                end: "top 45%",
+                scrub: 0.6,
+              },
+            }
+          );
         }
       });
-      yearScrollTriggers.forEach((t) => {
-        if (t) {
-          t.kill();
-          if (t.scrollTrigger) t.scrollTrigger.kill();
-        }
-      });
-    };
+    }, containerRef);
+
+    return () => ctx.revert();
   }, [reducedMotion]);
 
   return (
@@ -157,14 +172,14 @@ export const Journey: React.FC = () => {
             <div
               key={idx}
               ref={(el) => { cardsRef.current[idx] = el; }}
-              className={`relative flex flex-col gap-4 p-6 bg-surface border border-mist/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full max-w-lg z-10 ${
+              className={`relative flex flex-col gap-4 p-6 bg-surface border border-mist/20 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 w-full max-w-lg z-10 will-change-transform ${
                 idx % 2 === 0 ? "md:self-start" : "md:self-end"
               }`}
             >
-              {/* Scrub-sliding Year numeral */}
+              {/* Scrub-sliding Year numeral (Criss-Cross) */}
               <div
                 ref={(el) => { yearsRef.current[idx] = el; }}
-                className={`absolute -top-14 font-heading font-bold text-7xl md:text-8xl text-sky/25 select-none z-0 pointer-events-none ${
+                className={`absolute -top-14 font-heading font-bold text-7xl md:text-8xl text-sky/25 select-none z-0 pointer-events-none will-change-transform ${
                   idx % 2 === 0 ? "-left-4" : "-right-4"
                 }`}
               >
@@ -180,7 +195,7 @@ export const Journey: React.FC = () => {
                   {card.teaser}
                 </p>
 
-                {/* Inline Expansion Block using grid-template-rows */}
+                {/* Inline Expansion Block */}
                 <CardExpansion
                   expanded={expanded}
                   story={card.story}
@@ -189,8 +204,11 @@ export const Journey: React.FC = () => {
                   onImageError={() => handleImageError(idx)}
                 />
 
-                {/* Card footer (Twitter/Social style) */}
-                <div className="flex items-center gap-3 border-t border-mist/10 pt-4 mt-4">
+                {/* Card footer */}
+                <div
+                  ref={(el) => { footersRef.current[idx] = el; }}
+                  className="flex items-center gap-3 border-t border-mist/10 pt-4 mt-4 will-change-transform"
+                >
                   <img
                     src="/photo.jpg"
                     className="w-7 h-7 rounded-full object-cover border border-mist/15"
@@ -218,7 +236,6 @@ export const Journey: React.FC = () => {
   );
 };
 
-/* Core expansion subcomponent using GSAP to slide open grid-template-rows */
 interface CardExpansionProps {
   expanded: boolean;
   story: string;

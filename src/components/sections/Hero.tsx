@@ -7,50 +7,150 @@ import { CountUp } from "@/components/CountUp";
 import { EmailPill } from "@/components/EmailPill";
 import { Magnetic } from "@/components/Magnetic";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
-gsap.registerPlugin(SplitText);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 export const Hero: React.FC = () => {
   const reducedMotion = useAppStore((s) => s.reducedMotion);
   const lenis = useSmoothScroll();
-  const photoRef = useRef<HTMLImageElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const monogramRef = useRef<HTMLDivElement>(null);
+  const photoCardRef = useRef<HTMLDivElement>(null);
+  const photoImgRef = useRef<HTMLImageElement>(null);
   const h1Ref = useRef<HTMLHeadingElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const traitsRef = useRef<HTMLDivElement>(null);
 
   const softSkills =
     SKILL_GROUPS.find((g) => g.key === "soft")?.skills.map((s) => s.name) || [];
 
   useEffect(() => {
-    // 1. Photo reveal scale-in
-    gsap.fromTo(
-      photoRef.current,
-      { scale: 0.9, opacity: 0 },
-      { scale: 1, opacity: 1, duration: 1.2, ease: "power3.out" }
-    );
+    if (reducedMotion) return;
 
-    // 2. H1 text splits and mask reveals
-    if (!reducedMotion && h1Ref.current) {
-      const split = new SplitText(h1Ref.current, {
-        type: "lines,words",
-        linesClass: "line-mask",
+    const ctx = gsap.context(() => {
+      // 1. MASTER ENTRANCE TIMELINE (~1.6s)
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      // Monogram clip-in from left
+      if (monogramRef.current) {
+        tl.fromTo(
+          monogramRef.current,
+          { clipPath: "inset(0 100% 0 0)", opacity: 0 },
+          { clipPath: "inset(0 0% 0 0)", opacity: 0.9, duration: 1.0 },
+          0
+        );
+      }
+
+      // Photo scale 1.15 + blur(20px) -> sharpens & settles
+      if (photoImgRef.current) {
+        tl.fromTo(
+          photoImgRef.current,
+          { scale: 1.15, filter: "blur(20px)" },
+          { scale: 1, filter: "blur(0px)", duration: 1.2 },
+          0.1
+        );
+      }
+
+      // H1 line unmask
+      if (h1Ref.current) {
+        const split = new SplitText(h1Ref.current, {
+          type: "lines,words",
+          linesClass: "line-mask",
+        });
+
+        tl.fromTo(
+          split.words,
+          { yPercent: 110 },
+          {
+            yPercent: 0,
+            duration: 0.9,
+            ease: "power4.out",
+            stagger: 0.035,
+          },
+          0.2
+        );
+      }
+
+      // Traits & Action content fade in last
+      if (traitsRef.current && contentRef.current) {
+        tl.fromTo(
+          [traitsRef.current, contentRef.current],
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1 },
+          0.9
+        );
+      }
+
+      // 2. PINNED HERO SCRUB EXIT (150vh)
+      const section = sectionRef.current;
+      if (!section) return;
+
+      const exitTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: "+=150vh",
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.8,
+          onRefresh: () => {
+            ScrollTrigger.update();
+          },
+        },
       });
 
-      gsap.fromTo(
-        split.words,
-        { yPercent: 100 },
-        {
-          yPercent: 0,
-          duration: 1,
-          ease: "power4.out",
-          stagger: 0.04,
-          delay: 0.1,
-        }
-      );
+      // Giant RUBAHAN drifts up-left faster than scroll
+      if (monogramRef.current) {
+        exitTl.to(
+          monogramRef.current,
+          { xPercent: -30, yPercent: -40, opacity: 0.2, ease: "none" },
+          0
+        );
+      }
 
-      return () => {
-        split.revert();
-      };
-    }
+      // H1 slides right and up
+      if (h1Ref.current) {
+        exitTl.to(
+          h1Ref.current,
+          { x: 120, y: -80, opacity: 0.1, ease: "none" },
+          0
+        );
+      }
+
+      // Intro copy & buttons fade away
+      if (contentRef.current) {
+        exitTl.to(contentRef.current, { y: -50, opacity: 0, ease: "none" }, 0);
+      }
+
+      // Photo card SCALES DOWN, TRANSLATES LEFT, and BLURS (0 -> 24px, opacity 0.45)
+      // Becoming the blurred ghost behind Journey
+      if (photoCardRef.current && photoImgRef.current) {
+        exitTl.to(
+          photoCardRef.current,
+          {
+            x: -220,
+            y: 180,
+            scale: 0.7,
+            opacity: 0.45,
+            ease: "power1.inOut",
+          },
+          0
+        );
+
+        exitTl.to(
+          photoImgRef.current,
+          {
+            filter: "blur(24px)",
+            ease: "power1.inOut",
+          },
+          0
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, [reducedMotion]);
 
   const handleScrollTo = (id: string) => {
@@ -66,15 +166,22 @@ export const Hero: React.FC = () => {
   return (
     <section
       id="hero"
-      className="relative min-h-screen w-full bg-canvas overflow-hidden flex flex-col justify-between items-center py-20 px-6 md:pl-72 md:pr-12 select-none z-10"
+      ref={sectionRef}
+      className="relative h-screen w-full bg-canvas overflow-hidden flex flex-col justify-between items-center py-16 px-6 md:pl-72 md:pr-12 select-none z-10"
     >
       {/* Giant Background Monogram Type */}
-      <div className="absolute top-8 left-0 w-full text-center font-heading font-bold text-[15vw] leading-none text-[#38BDF8] opacity-90 select-none tracking-tighter uppercase z-0 pt-4 pointer-events-none overflow-hidden whitespace-nowrap">
+      <div
+        ref={monogramRef}
+        className="absolute top-8 left-0 w-full text-center font-heading font-bold text-[15vw] leading-none text-sky opacity-90 select-none tracking-tighter uppercase z-0 pt-4 pointer-events-none overflow-hidden whitespace-nowrap will-change-transform"
+      >
         RUBAHAN
       </div>
 
       {/* Trait Pills Left Edge */}
-      <div className="absolute left-8 lg:left-72 top-1/2 -translate-y-1/2 flex flex-col gap-2.5 z-20 hidden xl:flex">
+      <div
+        ref={traitsRef}
+        className="absolute left-8 lg:left-72 top-1/2 -translate-y-1/2 flex flex-col gap-2.5 z-20 hidden xl:flex will-change-transform"
+      >
         <span className="font-mono text-[10px] uppercase tracking-widest text-mist mb-1">
           TRAITS
         </span>
@@ -89,25 +196,28 @@ export const Hero: React.FC = () => {
       </div>
 
       {/* Center Layout Container */}
-      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative z-10 mt-12">
-        {/* Central Photo with overlapping Badge Chips */}
-        <div className="relative w-56 h-72 sm:w-64 sm:h-80 md:w-80 md:h-[400px] mb-8 select-none">
+      <div className="flex-1 flex flex-col justify-center items-center w-full max-w-4xl relative z-10 mt-6">
+        {/* Central Photo Card */}
+        <div
+          ref={photoCardRef}
+          className="relative w-52 h-64 sm:w-60 sm:h-72 md:w-72 md:h-[360px] mb-6 select-none will-change-transform"
+        >
           <div className="w-full h-full rounded-2xl overflow-hidden shadow-2xl border-4 border-surface bg-surface">
             <img
-              ref={photoRef}
+              ref={photoImgRef}
               src="/photo.jpg"
               alt="Rubahan P"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover will-change-transform"
             />
           </div>
 
-          {/* Floating Badge Chips with CountUp */}
-          <div className="absolute -right-2 sm:-right-8 top-12 bg-surface border border-mist/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg flex items-center gap-2 z-25 font-mono text-[9px] sm:text-xs text-ink whitespace-nowrap">
+          {/* Floating Badge Chips */}
+          <div className="absolute -right-2 sm:-right-8 top-10 bg-surface border border-mist/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg flex items-center gap-2 z-25 font-mono text-[9px] sm:text-xs text-ink whitespace-nowrap">
             <CountUp end={5} className="font-bold text-deep" />
             <span>Flagship Projects</span>
           </div>
 
-          <div className="absolute -left-4 sm:-left-12 bottom-12 bg-surface border border-mist/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg flex items-center gap-2 z-25 font-mono text-[9px] sm:text-xs text-ink whitespace-nowrap">
+          <div className="absolute -left-4 sm:-left-10 bottom-10 bg-surface border border-mist/20 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg flex items-center gap-2 z-25 font-mono text-[9px] sm:text-xs text-ink whitespace-nowrap">
             <CountUp end={3} className="font-bold text-deep" />
             <span>Years of Engineering</span>
           </div>
@@ -116,7 +226,7 @@ export const Hero: React.FC = () => {
         {/* Overlay H1 */}
         <h1
           ref={h1Ref}
-          className="font-heading font-bold text-center text-3xl sm:text-4xl md:text-6xl lg:text-7xl tracking-tight text-ink leading-[0.95] mb-6 pointer-events-none"
+          className="font-heading font-bold text-center text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight text-ink leading-[0.95] mb-4 pointer-events-none will-change-transform"
         >
           <div>Engineering,</div>
           <div>Applied</div>
@@ -124,19 +234,22 @@ export const Hero: React.FC = () => {
         </h1>
 
         {/* Intro copy block */}
-        <div className="max-w-xl text-center flex flex-col items-center gap-6 mt-4">
+        <div
+          ref={contentRef}
+          className="max-w-xl text-center flex flex-col items-center gap-4 mt-2 will-change-transform"
+        >
           <p className="text-xs uppercase tracking-[0.2em] text-deep font-semibold">
             {HERO_COPY.eyebrow}
           </p>
-          <p className="text-sm md:text-base text-mist leading-relaxed font-medium">
+          <p className="text-xs md:text-sm text-mist leading-relaxed font-medium">
             {HERO_COPY.intro}
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 mt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-1">
             <Magnetic>
               <a
                 href={`mailto:${PROFILE.email}`}
-                className="px-8 py-3.5 bg-sky text-ink hover:bg-deep hover:text-surface rounded-full text-sm font-semibold transition-all duration-300 shadow-md cursor-pointer"
+                className="px-6 py-2.5 bg-sky text-ink hover:bg-deep hover:text-surface rounded-full text-xs font-semibold transition-all duration-300 shadow-md cursor-pointer"
               >
                 Let's Talk
               </a>
@@ -144,14 +257,14 @@ export const Hero: React.FC = () => {
             <Magnetic>
               <button
                 onClick={() => handleScrollTo("about")}
-                className="px-8 py-3.5 border border-mist/30 hover:border-deep text-ink hover:text-deep rounded-full text-sm font-semibold transition-all duration-300 cursor-pointer"
+                className="px-6 py-2.5 border border-mist/30 hover:border-deep text-ink hover:text-deep rounded-full text-xs font-semibold transition-all duration-300 cursor-pointer"
               >
                 About Me
               </button>
             </Magnetic>
           </div>
 
-          <EmailPill className="mt-2" />
+          <EmailPill className="mt-1" />
         </div>
       </div>
     </section>
