@@ -32,16 +32,17 @@ export const Projects: React.FC = () => {
     }
   };
 
-  // DESKTOP: PINNED HORIZONTAL GALLERY (300vh pin distance)
+  // DESKTOP: PINNED HORIZONTAL GALLERY & DARK THEME LERPING
   useEffect(() => {
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track || reducedMotion || !isDesktop) return;
 
     const ctx = gsap.context(() => {
-      // 1. PIN & HORIZONTAL TRACK TRANSLATION (~300vh)
+      // Calculate total horizontal scroll distance
       const totalScrollWidth = track.scrollWidth - window.innerWidth + 320;
 
+      // 1. PIN, HORIZONTAL TRACK TRANSLATION & DARK THEME LERPING (#F6FAFD <-> #0B1F33)
       const pinTimeline = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -50,6 +51,46 @@ export const Projects: React.FC = () => {
           pin: true,
           pinSpacing: true,
           scrub: 0.8,
+          onEnter: () => {
+            gsap.to(document.documentElement, {
+              "--color-canvas": "#0B1F33",
+              "--color-surface": "#0C233B",
+              "--color-ink": "#FFFFFF",
+              "--color-mist": "#8FB3C7",
+              duration: 0.6,
+              ease: "power2.out",
+            });
+          },
+          onLeave: () => {
+            gsap.to(document.documentElement, {
+              "--color-canvas": "#F6FAFD",
+              "--color-surface": "#FFFFFF",
+              "--color-ink": "#0B1F33",
+              "--color-mist": "#8FB3C7",
+              duration: 0.6,
+              ease: "power2.out",
+            });
+          },
+          onEnterBack: () => {
+            gsap.to(document.documentElement, {
+              "--color-canvas": "#0B1F33",
+              "--color-surface": "#0C233B",
+              "--color-ink": "#FFFFFF",
+              "--color-mist": "#8FB3C7",
+              duration: 0.6,
+              ease: "power2.out",
+            });
+          },
+          onLeaveBack: () => {
+            gsap.to(document.documentElement, {
+              "--color-canvas": "#F6FAFD",
+              "--color-surface": "#FFFFFF",
+              "--color-ink": "#0B1F33",
+              "--color-mist": "#8FB3C7",
+              duration: 0.6,
+              ease: "power2.out",
+            });
+          },
           onRefresh: () => {
             ScrollTrigger.update();
           },
@@ -61,54 +102,7 @@ export const Projects: React.FC = () => {
         ease: "none",
       });
 
-      // 2. BACKGROUND THEME LERPING (#F6FAFD <-> #0B1F33) - ONLY DARK PASSAGE
-      ScrollTrigger.create({
-        trigger: section,
-        start: "top 50%",
-        end: `+=${Math.max(totalScrollWidth, window.innerHeight * 3) + window.innerHeight * 0.4}`,
-        onEnter: () => {
-          gsap.to(document.documentElement, {
-            "--color-canvas": "#0B1F33",
-            "--color-surface": "#0C233B",
-            "--color-ink": "#FFFFFF",
-            "--color-mist": "#8FB3C7",
-            duration: 0.6,
-            ease: "power2.out",
-          });
-        },
-        onLeave: () => {
-          gsap.to(document.documentElement, {
-            "--color-canvas": "#F6FAFD",
-            "--color-surface": "#FFFFFF",
-            "--color-ink": "#0B1F33",
-            "--color-mist": "#8FB3C7",
-            duration: 0.6,
-            ease: "power2.out",
-          });
-        },
-        onEnterBack: () => {
-          gsap.to(document.documentElement, {
-            "--color-canvas": "#0B1F33",
-            "--color-surface": "#0C233B",
-            "--color-ink": "#FFFFFF",
-            "--color-mist": "#8FB3C7",
-            duration: 0.6,
-            ease: "power2.out",
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(document.documentElement, {
-            "--color-canvas": "#F6FAFD",
-            "--color-surface": "#FFFFFF",
-            "--color-ink": "#0B1F33",
-            "--color-mist": "#8FB3C7",
-            duration: 0.6,
-            ease: "power2.out",
-          });
-        },
-      });
-
-      // 3. CARD CENTER CROSS SCALE (0.9 -> 1.05) & OPACITY (0.6 -> 1)
+      // 2. CARD CENTER CROSS SCALE (0.9 -> 1.05) & OPACITY (0.6 -> 1)
       cardsRef.current.forEach((card) => {
         if (!card) return;
 
@@ -148,6 +142,69 @@ export const Projects: React.FC = () => {
 
     return () => {
       ctx.revert();
+      gsap.to(document.documentElement, {
+        "--color-canvas": "#F6FAFD",
+        "--color-surface": "#FFFFFF",
+        "--color-ink": "#0B1F33",
+        "--color-mist": "#8FB3C7",
+        duration: 0.1,
+      });
+    };
+  }, [reducedMotion, isDesktop]);
+
+  // MOBILE: DARK THEME LERPING ON SCROLL (<=768px)
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || reducedMotion || isDesktop) return;
+
+    const trigger = ScrollTrigger.create({
+      trigger: section,
+      start: "top 60%",
+      end: "bottom 40%",
+      onEnter: () => {
+        gsap.to(document.documentElement, {
+          "--color-canvas": "#0B1F33",
+          "--color-surface": "#0C233B",
+          "--color-ink": "#FFFFFF",
+          "--color-mist": "#8FB3C7",
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+      onLeave: () => {
+        gsap.to(document.documentElement, {
+          "--color-canvas": "#F6FAFD",
+          "--color-surface": "#FFFFFF",
+          "--color-ink": "#0B1F33",
+          "--color-mist": "#8FB3C7",
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+      onEnterBack: () => {
+        gsap.to(document.documentElement, {
+          "--color-canvas": "#0B1F33",
+          "--color-surface": "#0C233B",
+          "--color-ink": "#FFFFFF",
+          "--color-mist": "#8FB3C7",
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+      onLeaveBack: () => {
+        gsap.to(document.documentElement, {
+          "--color-canvas": "#F6FAFD",
+          "--color-surface": "#FFFFFF",
+          "--color-ink": "#0B1F33",
+          "--color-mist": "#8FB3C7",
+          duration: 0.6,
+          ease: "power2.out",
+        });
+      },
+    });
+
+    return () => {
+      trigger.kill();
       gsap.to(document.documentElement, {
         "--color-canvas": "#F6FAFD",
         "--color-surface": "#FFFFFF",
