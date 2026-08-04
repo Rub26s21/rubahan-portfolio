@@ -236,15 +236,15 @@ export const Hero: React.FC = () => {
 
       {/* ── CENTER LAYOUT CONTAINER ── */}
       <div className="relative w-full max-w-5xl mx-auto flex-1 flex items-end justify-center z-10 pt-16 pb-12">
-        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (No Background Plate/Container, z-10) ── */}
+        {/* ── PHASE 2: SUBJECT HERO PORTRAIT (Cutout floating over text, z-10) ── */}
         <motion.div
           variants={portraitVariants}
-          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] z-10 will-change-transform"
+          className="relative w-[340px] sm:w-[420px] md:w-[520px] aspect-[4/5] z-10 will-change-transform flex items-center justify-center overflow-hidden"
         >
           <img
             src="/photo.jpg"
             alt="Rubahan P"
-            className="w-full h-full object-cover select-none rounded-3xl shadow-2xl"
+            className="w-full h-full object-cover select-none mix-blend-multiply scale-[1.5] origin-center"
           />
 
           {/* Circular Glass Play Reel Button */}
